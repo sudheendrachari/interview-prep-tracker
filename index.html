@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Prep Tracker</title>
+  <meta name="description" content="Track your interview preparation progress — Neetcode DSA, System Design, and JS/React projects.">
+  <style>
+    /* ===== FONT FACES ===== */
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('libs/fonts/inter-400.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('libs/fonts/inter-500.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('libs/fonts/inter-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url('libs/fonts/inter-700.woff2') format('woff2'); }
+
+    /* ===== CSS CUSTOM PROPERTIES ===== */
+    :root {
+      --bg-primary: #06060b;
+      --bg-secondary: #0e0e18;
+      --bg-card: rgba(255,255,255,0.035);
+      --bg-card-hover: rgba(255,255,255,0.06);
+      --border-card: rgba(255,255,255,0.07);
+      --border-card-hover: rgba(255,255,255,0.14);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #525a6b;
+      --green-main: #10b981;
+      --green-dark: #059669;
+      --green-light: #34d399;
+      --blue-main: #3b82f6;
+      --blue-dark: #2563eb;
+      --blue-light: #60a5fa;
+      --amber-main: #f59e0b;
+      --amber-dark: #d97706;
+      --amber-light: #fbbf24;
+      --streak-orange: #f97316;
+      --danger: #ef4444;
+      --heatmap-0: rgba(255,255,255,0.03);
+      --heatmap-1: #064e3b;
+      --heatmap-2: #059669;
+      --heatmap-3: #10b981;
+      --heatmap-4: #34d399;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow-glow-green: 0 0 20px rgba(16,185,129,0.15);
+      --shadow-glow-blue: 0 0 20px rgba(59,130,246,0.15);
+      --shadow-glow-amber: 0 0 20px rgba(245,158,11,0.15);
+    }
+
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scrollbar-color: #1e293b #06060b; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16,185,129,0.08), transparent),
+                  radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59,130,246,0.04), transparent);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-card-hover);
+    }
+
+    /* ===== HERO HEADER ===== */
+    .hero { text-align: center; padding: 2.5rem 0 1rem; }
+    .hero h1 {
+      font-size: 2.75rem; font-weight: 700; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #f59e0b 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .subtitle { color: var(--text-secondary); font-size: 1rem; margin-top: 0.25rem; font-weight: 400; }
+    .quick-stats {
+      display: flex; justify-content: center; gap: 2.5rem; margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .quick-stat { text-align: center; }
+    .quick-stat .value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+    .quick-stat .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.125rem; }
+
+    /* ===== STREAK BAR ===== */
+    .streak-bar {
+      display: flex; align-items: center; justify-content: center; gap: 3rem;
+      padding: 1.25rem 2rem; margin: 1.5rem 0;
+      background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(239,68,68,0.05));
+      border: 1px solid rgba(249,115,22,0.15);
+      border-radius: var(--radius-lg);
+      flex-wrap: wrap;
+    }
+    .streak-item { display: flex; align-items: center; gap: 0.75rem; }
+    .streak-fire { font-size: 2rem; animation: pulse-fire 1.5s ease-in-out infinite; }
+    @keyframes pulse-fire { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .streak-number { font-size: 1.75rem; font-weight: 700; color: var(--streak-orange); }
+    .streak-label { font-size: 0.8rem; color: var(--text-secondary); }
+    .streak-nudge {
+      font-size: 0.85rem; color: var(--amber-main); font-weight: 500;
+      text-align: center; width: 100%; margin-top: 0.25rem;
+      opacity: 0.9;
+    }
+    .streak-nudge.rest-day { color: var(--text-muted); }
+
+    /* ===== TRACK PROGRESS CARDS ===== */
+    .track-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .track-card { position: relative; overflow: hidden; }
+    .track-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .track-card.neetcode::before { background: linear-gradient(90deg, var(--green-dark), var(--green-light)); }
+    .track-card.sysdesign::before { background: linear-gradient(90deg, var(--blue-dark), var(--blue-light)); }
+    .track-card.jsreact::before { background: linear-gradient(90deg, var(--amber-dark), var(--amber-light)); }
+    .track-card .track-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .track-card .track-icon { font-size: 1.5rem; }
+    .track-card .track-title { font-size: 1rem; font-weight: 600; }
+    .track-card .track-count { font-size: 1.5rem; font-weight: 700; }
+
+    /* Progress ring */
+    .progress-ring-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+    .progress-ring { width: 60px; height: 60px; transform: rotate(-90deg); }
+    .progress-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+    .progress-ring .ring-bg { stroke: rgba(255,255,255,0.06); }
+    .progress-ring .ring-fill { transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .progress-info .progress-pct { font-size: 1.25rem; font-weight: 700; }
+    .progress-info .progress-detail { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Progress bar */
+    .progress-bar-track {
+      width: 100%; height: 6px; background: rgba(255,255,255,0.06);
+      border-radius: 3px; overflow: hidden; margin: 0.5rem 0;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 3px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .category-mini { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    /* ===== HEATMAP ===== */
+    .heatmap-section { margin: 2rem 0; }
+    .section-title {
+      font-size: 1.15rem; font-weight: 600; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .heatmap-wrapper { overflow-x: auto; padding-bottom: 0.5rem; }
+    .heatmap-grid {
+      display: grid;
+      grid-template-rows: repeat(7, 14px);
+      grid-auto-flow: column;
+      grid-auto-columns: 14px;
+      gap: 3px;
+    }
+    .heatmap-cell {
+      width: 14px; height: 14px; border-radius: 3px;
+      background: var(--heatmap-0);
+      transition: all 0.2s; cursor: pointer; position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.4); z-index: 10; }
+    .heatmap-cell.level-1 { background: var(--heatmap-1); }
+    .heatmap-cell.level-2 { background: var(--heatmap-2); }
+    .heatmap-cell.level-3 { background: var(--heatmap-3); }
+    .heatmap-cell.weekend { border: 1px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.015); }
+    .heatmap-cell.weekend.level-1, .heatmap-cell.weekend.level-2, .heatmap-cell.weekend.level-3 {
+      box-shadow: 0 0 6px rgba(250,204,21,0.4); border-color: rgba(250,204,21,0.3);
+    }
+    .heatmap-cell.future { opacity: 0.3; }
+    .heatmap-cell.today { outline: 2px solid var(--green-main); outline-offset: 1px; }
+    .heatmap-tooltip {
+      position: fixed; padding: 0.5rem 0.75rem; background: #1e293b; color: #e2e8f0;
+      border-radius: var(--radius-xs); font-size: 0.75rem; pointer-events: none;
+      z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: none;
+      max-width: 250px; line-height: 1.4;
+    }
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 0.35rem; margin-top: 0.75rem; justify-content: flex-end;
+      font-size: 0.7rem; color: var(--text-muted);
+    }
+    .heatmap-legend .legend-cell {
+      width: 12px; height: 12px; border-radius: 2px;
+    }
+    .heatmap-months {
+      display: flex; gap: 3px; margin-bottom: 4px; padding-left: 0;
+      font-size: 0.65rem; color: var(--text-muted);
+    }
+
+    /* ===== DAILY CHECK-IN ===== */
+    .checkin-section { margin: 2rem 0; }
+    .checkin-date-bar {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+    }
+    .checkin-date-bar input[type="date"] {
+      background: var(--bg-card); border: 1px solid var(--border-card);
+      color: var(--text-primary); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif; font-size: 0.9rem;
+      color-scheme: dark;
+    }
+    .checkin-date-bar .date-nav {
+      background: none; border: 1px solid var(--border-card); color: var(--text-secondary);
+      width: 32px; height: 32px; border-radius: var(--radius-xs); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .checkin-date-bar .date-nav:hover { border-color: var(--border-card-hover); color: var(--text-primary); }
+    .checkin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; }
+
+    .checkin-card { padding: 1.25rem; }
+    .checkin-card .checkin-title {
+      font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .checkin-card .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .checkin-card.neetcode .dot { background: var(--green-main); }
+    .checkin-card.sysdesign .dot { background: var(--blue-main); }
+    .checkin-card.jsreact .dot { background: var(--amber-main); }
+
+    /* Form elements */
+    .form-group { margin-bottom: 0.75rem; }
+    .form-group label {
+      display: block; font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%; padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-card);
+      color: var(--text-primary); border-radius: var(--radius-xs);
+      font-family: 'Inter', sans-serif; font-size: 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: var(--green-main);
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-group select option { background: #1e293b; }
+
+    .minute-input-group { display: flex; align-items: center; gap: 0.5rem; }
+    .minute-input-group input { width: 80px; text-align: center; }
+    .minute-input-group span { font-size: 0.8rem; color: var(--text-muted); }
+
+    .btn {
+      padding: 0.5rem 1.25rem; border: none; border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-main), var(--green-dark));
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-glow-green); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06); color: var(--text-secondary);
+      border: 1px solid var(--border-card);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+    .save-feedback {
+      display: inline-block; margin-left: 0.75rem; font-size: 0.8rem;
+      color: var(--green-main); opacity: 0; transition: opacity 0.3s;
+    }
+    .save-feedback.show { opacity: 1; }
+
+    /* ===== PROBLEM ROADMAP ===== */
+    .roadmap-section { margin: 2rem 0; }
+    .list-toggle {
+      display: inline-flex; background: rgba(255,255,255,0.04); border-radius: var(--radius-sm);
+      border: 1px solid var(--border-card); overflow: hidden; margin-bottom: 1rem;
+    }
+    .list-toggle button {
+      padding: 0.5rem 1.25rem; background: none; border: none; color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .list-toggle button.active {
+      background: rgba(16,185,129,0.15); color: var(--green-main); font-weight: 600;
+    }
+
+    .category-accordion { margin-bottom: 0.75rem; }
+    .category-header {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem;
+      background: var(--bg-card); border: 1px solid var(--border-card);
+      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;
+      width: 100%; color: var(--text-primary);
+    }
+    .category-header:hover { background: var(--bg-card-hover); }
+    .category-header .chevron {
+      font-size: 0.7rem; color: var(--text-muted); transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .category-header .chevron.open { transform: rotate(90deg); }
+    .category-header .cat-name { font-size: 0.9rem; font-weight: 600; flex: 1; text-align: left; }
+    .category-header .cat-progress {
+      font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0;
+    }
+    .category-header .cat-bar {
+      width: 80px; height: 4px; background: rgba(255,255,255,0.06);
+      border-radius: 2px; overflow: hidden; flex-shrink: 0;
+    }
+    .category-header .cat-bar-fill {
+      height: 100%; background: var(--green-main); border-radius: 2px;
+      transition: width 0.4s;
+    }
+
+    .category-problems {
+      max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: 0 0.25rem;
+    }
+    .category-problems.open { max-height: 2000px; }
+    .category-problems-inner { padding: 0.5rem 0; }
+
+    .problem-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem;
+      border-radius: var(--radius-xs); transition: background 0.15s; cursor: pointer;
+    }
+    .problem-item:hover { background: rgba(255,255,255,0.03); }
+    .problem-item input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none; width: 18px; height: 18px;
+      border: 2px solid var(--border-card-hover); border-radius: 4px;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .problem-item input[type="checkbox"]:checked {
+      background: var(--green-main); border-color: var(--green-main);
+    }
+    .problem-item input[type="checkbox"]:checked::after {
+      content: '✓'; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .problem-item .problem-name {
+      font-size: 0.85rem; flex: 1; transition: color 0.2s;
+    }
+    .problem-item .problem-name.solved { color: var(--text-muted); text-decoration: line-through; }
+    .problem-item .problem-link {
+      font-size: 0.7rem; color: var(--text-muted); text-decoration: none;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .problem-item:hover .problem-link { opacity: 1; }
+    .problem-item .problem-link:hover { color: var(--green-main); }
+    .difficulty-badge {
+      font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 10px;
+      font-weight: 600; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .difficulty-badge.easy { background: rgba(16,185,129,0.15); color: var(--green-main); }
+    .difficulty-badge.medium { background: rgba(245,158,11,0.15); color: var(--amber-main); }
+    .difficulty-badge.hard { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    /* ===== SYSTEM DESIGN ROADMAP ===== */
+    .sd-topic-list { margin-top: 0.5rem; }
+    .sd-topic-group { margin-bottom: 1rem; }
+    .sd-topic-group-title {
+      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem;
+      padding-left: 0.25rem;
+    }
+    .sd-topic-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-xs); transition: background 0.15s; cursor: pointer;
+    }
+    .sd-topic-item:hover { background: rgba(255,255,255,0.03); }
+    .sd-topic-item input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none; width: 18px; height: 18px;
+      border: 2px solid var(--border-card-hover); border-radius: 4px;
+      cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.2s;
+    }
+    .sd-topic-item input[type="checkbox"]:checked {
+      background: var(--blue-main); border-color: var(--blue-main);
+    }
+    .sd-topic-item input[type="checkbox"]:checked::after {
+      content: '✓'; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .sd-topic-item .sd-name { font-size: 0.85rem; flex: 1; }
+    .sd-topic-item .sd-name.solved { color: var(--text-muted); text-decoration: line-through; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      display: flex; align-items: center; justify-content: center; gap: 1rem;
+      padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border-card);
+      flex-wrap: wrap;
+    }
+    .footer .version { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ===== SYNC STATUS ===== */
+    .sync-bar {
+      display: flex; align-items: center; justify-content: center; gap: 1rem;
+      padding: 0.75rem 1.5rem; margin: 1.5rem 0 0;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border-card);
+      border-radius: var(--radius-md); flex-wrap: wrap;
+    }
+    .sync-status {
+      font-size: 0.8rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .sync-status .sync-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted);
+    }
+    .sync-status .sync-dot.connected { background: var(--green-main); }
+    .sync-status .sync-dot.syncing { background: var(--amber-main); animation: pulse-fire 1s ease-in-out infinite; }
+    .sync-status .sync-dot.error { background: var(--danger); }
+    .btn-sync {
+      padding: 0.35rem 1rem; border: 1px solid rgba(59,130,246,0.3);
+      background: rgba(59,130,246,0.1); color: var(--blue-light);
+      border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-sync:hover { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.5); }
+    .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-sync .spin { display: inline-block; animation: spinner 0.8s linear infinite; }
+    @keyframes spinner { to { transform: rotate(360deg); } }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 100; display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--bg-secondary); border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg); padding: 2rem; max-width: 480px; width: 90%;
+    }
+    .modal h3 { font-size: 1.1rem; margin-bottom: 1rem; }
+    .modal .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+    .modal .form-hint {
+      font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5;
+    }
+    .modal .form-hint a { color: var(--blue-light); text-decoration: none; }
+    .modal .form-hint a:hover { text-decoration: underline; }
+    .token-input-wrap {
+      position: relative; display: flex; align-items: center;
+    }
+    .token-input-wrap input {
+      width: 100%; padding-right: 40px;
+    }
+    .token-toggle {
+      position: absolute; right: 8px; background: none; border: none;
+      color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 4px;
+    }
+    .token-toggle:hover { color: var(--text-primary); }
+    .sync-connected-info {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem; background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2); border-radius: var(--radius-sm);
+      margin-bottom: 1rem; font-size: 0.8rem; color: var(--green-light);
+    }
+
+    /* ===== TABS ===== */
+    .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-card); }
+    .tab-btn {
+      padding: 0.75rem 1.25rem; background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text-secondary); }
+    .tab-btn.active { color: var(--green-main); border-bottom-color: var(--green-main); font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.75rem; }
+      .quick-stats { gap: 1.5rem; }
+      .streak-bar { gap: 1.5rem; padding: 1rem; }
+      .track-grid { grid-template-columns: 1fr; }
+      .checkin-grid { grid-template-columns: 1fr; }
+      .container { padding: 1rem; }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    .milestone-glow {
+      animation: shimmer 2s linear infinite;
+      background-size: 200% auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== HERO ===== -->
+    <header class="hero animate-in" id="hero">
+      <h1>Interview Prep Tracker</h1>
+      <p class="subtitle" id="subtitle"></p>
+      <div class="quick-stats" id="quick-stats"></div>
+    </header>
+
+    <!-- ===== STREAK BAR ===== -->
+    <div class="streak-bar animate-in" id="streak-bar"></div>
+
+    <!-- ===== TRACK PROGRESS ===== -->
+    <div class="track-grid" id="track-grid"></div>
+
+    <!-- ===== HEATMAP ===== -->
+    <section class="heatmap-section animate-in">
+      <div class="section-title">📊 Activity Heatmap</div>
+      <div class="card">
+        <div class="heatmap-wrapper" id="heatmap-wrapper"></div>
+        <div class="heatmap-legend">
+          <span>Less</span>
+          <div class="legend-cell" style="background:var(--heatmap-0)"></div>
+          <div class="legend-cell" style="background:var(--heatmap-1)"></div>
+          <div class="legend-cell" style="background:var(--heatmap-2)"></div>
+          <div class="legend-cell" style="background:var(--heatmap-3)"></div>
+          <span>More</span>
+          <span style="margin-left:0.75rem;">⭐ = Weekend bonus</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DAILY CHECK-IN ===== -->
+    <section class="checkin-section animate-in">
+      <div class="section-title">📝 Daily Check-in</div>
+      <div class="checkin-date-bar">
+        <button class="date-nav" id="date-prev" title="Previous day">◀</button>
+        <input type="date" id="checkin-date">
+        <button class="date-nav" id="date-next" title="Next day">▶</button>
+        <span id="checkin-day-label" style="font-size:0.85rem;color:var(--text-muted)"></span>
+      </div>
+      <div class="checkin-grid" id="checkin-grid"></div>
+      <div style="margin-top:1rem;display:flex;align-items:center;">
+        <button class="btn btn-primary" id="save-checkin">💾 Save Progress</button>
+        <span class="save-feedback" id="save-feedback">✓ Saved!</span>
+      </div>
+    </section>
+
+    <!-- ===== PROBLEM / SD ROADMAP ===== -->
+    <section class="roadmap-section animate-in">
+      <div class="section-title">🗺️ Roadmap</div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="dsa-tab">DSA Problems</button>
+        <button class="tab-btn" data-tab="sd-tab">System Design</button>
+      </div>
+
+      <!-- DSA Tab -->
+      <div class="tab-content active" id="dsa-tab">
+        <div class="list-toggle" id="list-toggle"></div>
+        <div id="roadmap-categories"></div>
+      </div>
+
+      <!-- System Design Tab -->
+      <div class="tab-content" id="sd-tab">
+        <div id="sd-roadmap"></div>
+      </div>
+    </section>
+
+    <!-- ===== SYNC BAR ===== -->
+    <div class="sync-bar" id="sync-bar">
+      <div class="sync-status" id="sync-status">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-status-text">Not connected</span>
+      </div>
+      <button class="btn-sync" id="sync-btn" title="Sync with GitHub Gist">☁️ Sync</button>
+      <button class="btn-sync" id="sync-settings-btn" title="Sync settings">⚙️</button>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <button class="btn btn-secondary btn-sm" id="export-btn">📤 Export Data</button>
+      <button class="btn btn-secondary btn-sm" id="import-btn">📥 Import Data</button>
+      <button class="btn btn-danger btn-sm" id="reset-btn">🗑️ Reset All</button>
+      <span class="version">v1.0 • Built for Sudheendra's prep journey</span>
+    </footer>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+  </div>
+
+  <!-- Tooltip for heatmap -->
+  <div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+
+  <!-- Reset confirmation modal -->
+  <div class="modal-overlay" id="reset-modal">
+    <div class="modal">
+      <h3>⚠️ Reset All Data?</h3>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">This will permanently delete all your progress, streaks, and daily logs. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="reset-cancel">Cancel</button>
+        <button class="btn btn-danger" id="reset-confirm">Yes, Reset Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync settings modal -->
+  <div class="modal-overlay" id="sync-modal">
+    <div class="modal">
+      <h3>☁️ GitHub Gist Sync</h3>
+      <div id="sync-connected-banner" style="display:none" class="sync-connected-info">
+        ✅ Connected — Gist ID: <code id="sync-gist-id-display" style="margin-left:0.25rem;font-size:0.75rem"></code>
+      </div>
+      <div class="form-group">
+        <label>GitHub Personal Access Token</label>
+        <div class="token-input-wrap">
+          <input type="password" id="sync-token-input" placeholder="ghp_xxxxxxxxxxxx">
+          <button class="token-toggle" id="token-toggle-btn" type="button">👁️</button>
+        </div>
+        <div class="form-hint">
+          Create one at <a href="https://github.com/settings/tokens?type=beta" target="_blank">GitHub Settings → Fine-grained tokens</a> with <strong>Gists</strong> permission only.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Gist ID (leave blank to create new)</label>
+        <input type="text" id="sync-gist-id-input" placeholder="Auto-created on first sync">
+        <div class="form-hint">If you already have a Gist from another device, paste its ID here.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger btn-sm" id="sync-disconnect-btn">Disconnect</button>
+        <button class="btn btn-secondary" id="sync-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="sync-modal-save">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="libs/confetti.min.js"></script>
+  <script>
+  // ============================================================
+  // DATA: BLIND 75 & NEETCODE 150 PROBLEMS
+  // ============================================================
+  const CATEGORIES = [
+    {
+      id: 'arrays-and-hashing', name: 'Arrays & Hashing',
+      problems: [
+        { id: 'contains-duplicate', name: 'Contains Duplicate', difficulty: 'easy', blind75: true },
+        { id: 'valid-anagram', name: 'Valid Anagram', difficulty: 'easy', blind75: true },
+        { id: 'two-sum', name: 'Two Sum', difficulty: 'easy', blind75: true },
+        { id: 'group-anagrams', name: 'Group Anagrams', difficulty: 'medium', blind75: true },
+        { id: 'top-k-frequent-elements', name: 'Top K Frequent Elements', difficulty: 'medium', blind75: true },
+        { id: 'product-of-array-except-self', name: 'Product of Array Except Self', difficulty: 'medium', blind75: true },
+        { id: 'encode-and-decode-strings', name: 'Encode and Decode Strings', difficulty: 'medium', blind75: true },
+        { id: 'longest-consecutive-sequence', name: 'Longest Consecutive Sequence', difficulty: 'medium', blind75: true },
+        { id: 'valid-sudoku', name: 'Valid Sudoku', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: 'two-pointers', name: 'Two Pointers',
+      problems: [
+        { id: 'valid-palindrome', name: 'Valid Palindrome', difficulty: 'easy', blind75: true },
+        { id: '3sum', name: '3Sum', difficulty: 'medium', blind75: true },
+        { id: 'container-with-most-water', name: 'Container With Most Water', difficulty: 'medium', blind75: true },
+        { id: 'two-sum-ii', name: 'Two Sum II - Input Array Is Sorted', difficulty: 'medium', blind75: false },
+        { id: 'trapping-rain-water', name: 'Trapping Rain Water', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'sliding-window', name: 'Sliding Window',
+      problems: [
+        { id: 'best-time-to-buy-sell-stock', name: 'Best Time to Buy and Sell Stock', difficulty: 'easy', blind75: true },
+        { id: 'longest-substring-without-repeating', name: 'Longest Substring Without Repeating Characters', difficulty: 'medium', blind75: true },
+        { id: 'longest-repeating-character-replacement', name: 'Longest Repeating Character Replacement', difficulty: 'medium', blind75: true },
+        { id: 'minimum-window-substring', name: 'Minimum Window Substring', difficulty: 'hard', blind75: true },
+        { id: 'permutation-in-string', name: 'Permutation in String', difficulty: 'medium', blind75: false },
+        { id: 'sliding-window-maximum', name: 'Sliding Window Maximum', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'stack', name: 'Stack',
+      problems: [
+        { id: 'valid-parentheses', name: 'Valid Parentheses', difficulty: 'easy', blind75: true },
+        { id: 'min-stack', name: 'Min Stack', difficulty: 'medium', blind75: false },
+        { id: 'evaluate-reverse-polish-notation', name: 'Evaluate Reverse Polish Notation', difficulty: 'medium', blind75: false },
+        { id: 'generate-parentheses', name: 'Generate Parentheses', difficulty: 'medium', blind75: false },
+        { id: 'daily-temperatures', name: 'Daily Temperatures', difficulty: 'medium', blind75: false },
+        { id: 'car-fleet', name: 'Car Fleet', difficulty: 'medium', blind75: false },
+        { id: 'largest-rectangle-in-histogram', name: 'Largest Rectangle in Histogram', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'binary-search', name: 'Binary Search',
+      problems: [
+        { id: 'find-minimum-in-rotated-sorted-array', name: 'Find Minimum in Rotated Sorted Array', difficulty: 'medium', blind75: true },
+        { id: 'search-in-rotated-sorted-array', name: 'Search in Rotated Sorted Array', difficulty: 'medium', blind75: true },
+        { id: 'binary-search', name: 'Binary Search', difficulty: 'easy', blind75: false },
+        { id: 'search-a-2d-matrix', name: 'Search a 2D Matrix', difficulty: 'medium', blind75: false },
+        { id: 'koko-eating-bananas', name: 'Koko Eating Bananas', difficulty: 'medium', blind75: false },
+        { id: 'time-based-key-value-store', name: 'Time Based Key-Value Store', difficulty: 'medium', blind75: false },
+        { id: 'median-of-two-sorted-arrays', name: 'Median of Two Sorted Arrays', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'linked-list', name: 'Linked List',
+      problems: [
+        { id: 'reverse-linked-list', name: 'Reverse Linked List', difficulty: 'easy', blind75: true },
+        { id: 'merge-two-sorted-lists', name: 'Merge Two Sorted Lists', difficulty: 'easy', blind75: true },
+        { id: 'reorder-list', name: 'Reorder List', difficulty: 'medium', blind75: true },
+        { id: 'remove-nth-node-from-end', name: 'Remove Nth Node From End of List', difficulty: 'medium', blind75: true },
+        { id: 'linked-list-cycle', name: 'Linked List Cycle', difficulty: 'easy', blind75: true },
+        { id: 'merge-k-sorted-lists', name: 'Merge k Sorted Lists', difficulty: 'hard', blind75: true },
+        { id: 'copy-list-with-random-pointer', name: 'Copy List With Random Pointer', difficulty: 'medium', blind75: false },
+        { id: 'add-two-numbers', name: 'Add Two Numbers', difficulty: 'medium', blind75: false },
+        { id: 'find-the-duplicate-number', name: 'Find the Duplicate Number', difficulty: 'medium', blind75: false },
+        { id: 'lru-cache', name: 'LRU Cache', difficulty: 'medium', blind75: false },
+        { id: 'reverse-nodes-in-k-group', name: 'Reverse Nodes in k-Group', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'trees', name: 'Trees',
+      problems: [
+        { id: 'invert-binary-tree', name: 'Invert Binary Tree', difficulty: 'easy', blind75: true },
+        { id: 'maximum-depth-of-binary-tree', name: 'Maximum Depth of Binary Tree', difficulty: 'easy', blind75: true },
+        { id: 'same-tree', name: 'Same Tree', difficulty: 'easy', blind75: true },
+        { id: 'subtree-of-another-tree', name: 'Subtree of Another Tree', difficulty: 'easy', blind75: true },
+        { id: 'lowest-common-ancestor-bst', name: 'Lowest Common Ancestor of a BST', difficulty: 'medium', blind75: true },
+        { id: 'binary-tree-level-order-traversal', name: 'Binary Tree Level Order Traversal', difficulty: 'medium', blind75: true },
+        { id: 'validate-binary-search-tree', name: 'Validate Binary Search Tree', difficulty: 'medium', blind75: true },
+        { id: 'kth-smallest-element-bst', name: 'Kth Smallest Element in a BST', difficulty: 'medium', blind75: true },
+        { id: 'construct-binary-tree-preorder-inorder', name: 'Construct Binary Tree from Preorder and Inorder Traversal', difficulty: 'medium', blind75: true },
+        { id: 'binary-tree-maximum-path-sum', name: 'Binary Tree Maximum Path Sum', difficulty: 'hard', blind75: true },
+        { id: 'serialize-and-deserialize-binary-tree', name: 'Serialize and Deserialize Binary Tree', difficulty: 'hard', blind75: true },
+        { id: 'diameter-of-binary-tree', name: 'Diameter of Binary Tree', difficulty: 'easy', blind75: false },
+        { id: 'balanced-binary-tree', name: 'Balanced Binary Tree', difficulty: 'easy', blind75: false },
+        { id: 'binary-tree-right-side-view', name: 'Binary Tree Right Side View', difficulty: 'medium', blind75: false },
+        { id: 'count-good-nodes', name: 'Count Good Nodes in Binary Tree', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: 'tries', name: 'Tries',
+      problems: [
+        { id: 'implement-trie', name: 'Implement Trie (Prefix Tree)', difficulty: 'medium', blind75: true },
+        { id: 'design-add-search-words', name: 'Design Add and Search Words Data Structure', difficulty: 'medium', blind75: true },
+        { id: 'word-search-ii', name: 'Word Search II', difficulty: 'hard', blind75: true },
+      ]
+    },
+    {
+      id: 'heap-priority-queue', name: 'Heap / Priority Queue',
+      problems: [
+        { id: 'find-median-from-data-stream', name: 'Find Median from Data Stream', difficulty: 'hard', blind75: true },
+        { id: 'kth-largest-element-in-stream', name: 'Kth Largest Element in a Stream', difficulty: 'easy', blind75: false },
+        { id: 'last-stone-weight', name: 'Last Stone Weight', difficulty: 'easy', blind75: false },
+        { id: 'k-closest-points-to-origin', name: 'K Closest Points to Origin', difficulty: 'medium', blind75: false },
+        { id: 'kth-largest-element-in-array', name: 'Kth Largest Element in an Array', difficulty: 'medium', blind75: false },
+        { id: 'task-scheduler', name: 'Task Scheduler', difficulty: 'medium', blind75: false },
+        { id: 'design-twitter', name: 'Design Twitter', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: 'backtracking', name: 'Backtracking',
+      problems: [
+        { id: 'combination-sum', name: 'Combination Sum', difficulty: 'medium', blind75: true },
+        { id: 'word-search', name: 'Word Search', difficulty: 'medium', blind75: true },
+        { id: 'subsets', name: 'Subsets', difficulty: 'medium', blind75: false },
+        { id: 'permutations', name: 'Permutations', difficulty: 'medium', blind75: false },
+        { id: 'subsets-ii', name: 'Subsets II', difficulty: 'medium', blind75: false },
+        { id: 'combination-sum-ii', name: 'Combination Sum II', difficulty: 'medium', blind75: false },
+        { id: 'palindrome-partitioning', name: 'Palindrome Partitioning', difficulty: 'medium', blind75: false },
+        { id: 'letter-combinations-phone', name: 'Letter Combinations of a Phone Number', difficulty: 'medium', blind75: false },
+        { id: 'n-queens', name: 'N-Queens', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'graphs', name: 'Graphs',
+      problems: [
+        { id: 'number-of-islands', name: 'Number of Islands', difficulty: 'medium', blind75: true },
+        { id: 'clone-graph', name: 'Clone Graph', difficulty: 'medium', blind75: true },
+        { id: 'pacific-atlantic-water-flow', name: 'Pacific Atlantic Water Flow', difficulty: 'medium', blind75: true },
+        { id: 'course-schedule', name: 'Course Schedule', difficulty: 'medium', blind75: true },
+        { id: 'number-connected-components', name: 'Number of Connected Components in an Undirected Graph', difficulty: 'medium', blind75: true },
+        { id: 'graph-valid-tree', name: 'Graph Valid Tree', difficulty: 'medium', blind75: true },
+        { id: 'max-area-of-island', name: 'Max Area of Island', difficulty: 'medium', blind75: false },
+        { id: 'surrounded-regions', name: 'Surrounded Regions', difficulty: 'medium', blind75: false },
+        { id: 'rotting-oranges', name: 'Rotting Oranges', difficulty: 'medium', blind75: false },
+        { id: 'walls-and-gates', name: 'Walls and Gates', difficulty: 'medium', blind75: false },
+        { id: 'course-schedule-ii', name: 'Course Schedule II', difficulty: 'medium', blind75: false },
+        { id: 'redundant-connection', name: 'Redundant Connection', difficulty: 'medium', blind75: false },
+        { id: 'word-ladder', name: 'Word Ladder', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'advanced-graphs', name: 'Advanced Graphs',
+      problems: [
+        { id: 'alien-dictionary', name: 'Alien Dictionary', difficulty: 'hard', blind75: true },
+        { id: 'reconstruct-itinerary', name: 'Reconstruct Itinerary', difficulty: 'hard', blind75: false },
+        { id: 'min-cost-connect-all-points', name: 'Min Cost to Connect All Points', difficulty: 'medium', blind75: false },
+        { id: 'network-delay-time', name: 'Network Delay Time', difficulty: 'medium', blind75: false },
+        { id: 'swim-in-rising-water', name: 'Swim in Rising Water', difficulty: 'hard', blind75: false },
+        { id: 'cheapest-flights-within-k-stops', name: 'Cheapest Flights Within K Stops', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: '1d-dynamic-programming', name: '1-D Dynamic Programming',
+      problems: [
+        { id: 'climbing-stairs', name: 'Climbing Stairs', difficulty: 'easy', blind75: true },
+        { id: 'house-robber', name: 'House Robber', difficulty: 'medium', blind75: true },
+        { id: 'house-robber-ii', name: 'House Robber II', difficulty: 'medium', blind75: true },
+        { id: 'longest-palindromic-substring', name: 'Longest Palindromic Substring', difficulty: 'medium', blind75: true },
+        { id: 'palindromic-substrings', name: 'Palindromic Substrings', difficulty: 'medium', blind75: true },
+        { id: 'decode-ways', name: 'Decode Ways', difficulty: 'medium', blind75: true },
+        { id: 'coin-change', name: 'Coin Change', difficulty: 'medium', blind75: true },
+        { id: 'maximum-product-subarray', name: 'Maximum Product Subarray', difficulty: 'medium', blind75: true },
+        { id: 'word-break', name: 'Word Break', difficulty: 'medium', blind75: true },
+        { id: 'longest-increasing-subsequence', name: 'Longest Increasing Subsequence', difficulty: 'medium', blind75: true },
+        { id: 'min-cost-climbing-stairs', name: 'Min Cost Climbing Stairs', difficulty: 'easy', blind75: false },
+        { id: 'partition-equal-subset-sum', name: 'Partition Equal Subset Sum', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: '2d-dynamic-programming', name: '2-D Dynamic Programming',
+      problems: [
+        { id: 'unique-paths', name: 'Unique Paths', difficulty: 'medium', blind75: true },
+        { id: 'longest-common-subsequence', name: 'Longest Common Subsequence', difficulty: 'medium', blind75: true },
+        { id: 'best-time-buy-sell-cooldown', name: 'Best Time to Buy and Sell Stock with Cooldown', difficulty: 'medium', blind75: false },
+        { id: 'coin-change-ii', name: 'Coin Change II', difficulty: 'medium', blind75: false },
+        { id: 'target-sum', name: 'Target Sum', difficulty: 'medium', blind75: false },
+        { id: 'interleaving-string', name: 'Interleaving String', difficulty: 'medium', blind75: false },
+        { id: 'longest-increasing-path-matrix', name: 'Longest Increasing Path in a Matrix', difficulty: 'hard', blind75: false },
+        { id: 'distinct-subsequences', name: 'Distinct Subsequences', difficulty: 'hard', blind75: false },
+        { id: 'edit-distance', name: 'Edit Distance', difficulty: 'medium', blind75: false },
+        { id: 'burst-balloons', name: 'Burst Balloons', difficulty: 'hard', blind75: false },
+        { id: 'regular-expression-matching', name: 'Regular Expression Matching', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'greedy', name: 'Greedy',
+      problems: [
+        { id: 'maximum-subarray', name: 'Maximum Subarray', difficulty: 'medium', blind75: true },
+        { id: 'jump-game', name: 'Jump Game', difficulty: 'medium', blind75: true },
+        { id: 'jump-game-ii', name: 'Jump Game II', difficulty: 'medium', blind75: false },
+        { id: 'gas-station', name: 'Gas Station', difficulty: 'medium', blind75: false },
+        { id: 'hand-of-straights', name: 'Hand of Straights', difficulty: 'medium', blind75: false },
+        { id: 'merge-triplets-target', name: 'Merge Triplets to Form Target Triplet', difficulty: 'medium', blind75: false },
+        { id: 'partition-labels', name: 'Partition Labels', difficulty: 'medium', blind75: false },
+        { id: 'valid-parenthesis-string', name: 'Valid Parenthesis String', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: 'intervals', name: 'Intervals',
+      problems: [
+        { id: 'insert-interval', name: 'Insert Interval', difficulty: 'medium', blind75: true },
+        { id: 'merge-intervals', name: 'Merge Intervals', difficulty: 'medium', blind75: true },
+        { id: 'non-overlapping-intervals', name: 'Non-overlapping Intervals', difficulty: 'medium', blind75: true },
+        { id: 'meeting-rooms', name: 'Meeting Rooms', difficulty: 'easy', blind75: true },
+        { id: 'meeting-rooms-ii', name: 'Meeting Rooms II', difficulty: 'medium', blind75: true },
+        { id: 'minimum-interval-include-query', name: 'Minimum Interval to Include Each Query', difficulty: 'hard', blind75: false },
+      ]
+    },
+    {
+      id: 'math-and-geometry', name: 'Math & Geometry',
+      problems: [
+        { id: 'rotate-image', name: 'Rotate Image', difficulty: 'medium', blind75: true },
+        { id: 'spiral-matrix', name: 'Spiral Matrix', difficulty: 'medium', blind75: true },
+        { id: 'set-matrix-zeroes', name: 'Set Matrix Zeroes', difficulty: 'medium', blind75: true },
+        { id: 'happy-number', name: 'Happy Number', difficulty: 'easy', blind75: false },
+        { id: 'plus-one', name: 'Plus One', difficulty: 'easy', blind75: false },
+        { id: 'pow-x-n', name: 'Pow(x, n)', difficulty: 'medium', blind75: false },
+        { id: 'multiply-strings', name: 'Multiply Strings', difficulty: 'medium', blind75: false },
+        { id: 'detect-squares', name: 'Detect Squares', difficulty: 'medium', blind75: false },
+      ]
+    },
+    {
+      id: 'bit-manipulation', name: 'Bit Manipulation',
+      problems: [
+        { id: 'number-of-1-bits', name: 'Number of 1 Bits', difficulty: 'easy', blind75: true },
+        { id: 'counting-bits', name: 'Counting Bits', difficulty: 'easy', blind75: true },
+        { id: 'reverse-bits', name: 'Reverse Bits', difficulty: 'easy', blind75: true },
+        { id: 'missing-number', name: 'Missing Number', difficulty: 'easy', blind75: true },
+        { id: 'sum-of-two-integers', name: 'Sum of Two Integers', difficulty: 'medium', blind75: true },
+        { id: 'single-number', name: 'Single Number', difficulty: 'easy', blind75: false },
+        { id: 'reverse-integer', name: 'Reverse Integer', difficulty: 'medium', blind75: false },
+      ]
+    }
+  ];
+
+  // ============================================================
+  // DATA: SYSTEM DESIGN TOPICS
+  // ============================================================
+  const SYSTEM_DESIGN_TOPICS = [
+    {
+      group: 'Core Systems',
+      topics: [
+        { id: 'sd-url-shortener', name: 'Design a URL Shortener (TinyURL)' },
+        { id: 'sd-rate-limiter', name: 'Design a Rate Limiter' },
+        { id: 'sd-key-value-store', name: 'Design a Key-Value Store' },
+        { id: 'sd-unique-id-generator', name: 'Design a Unique ID Generator' },
+        { id: 'sd-notification-system', name: 'Design a Notification System' },
+        { id: 'sd-news-feed', name: 'Design a News Feed System' },
+        { id: 'sd-chat-system', name: 'Design a Chat System (WhatsApp)' },
+        { id: 'sd-search-autocomplete', name: 'Design a Search Autocomplete System' },
+      ]
+    },
+    {
+      group: 'Large-Scale Applications',
+      topics: [
+        { id: 'sd-youtube', name: 'Design YouTube / Netflix' },
+        { id: 'sd-google-drive', name: 'Design Google Drive / Dropbox' },
+        { id: 'sd-twitter', name: 'Design Twitter' },
+        { id: 'sd-instagram', name: 'Design Instagram' },
+        { id: 'sd-uber', name: 'Design Uber / Lyft' },
+        { id: 'sd-ticketing', name: 'Design a Ticketing System (BookMyShow)' },
+        { id: 'sd-ecommerce', name: 'Design an E-commerce Store (Amazon)' },
+        { id: 'sd-google-maps', name: 'Design Google Maps' },
+        { id: 'sd-web-crawler', name: 'Design a Web Crawler' },
+        { id: 'sd-payment-system', name: 'Design a Payment System' },
+      ]
+    },
+    {
+      group: 'Fundamental Concepts',
+      topics: [
+        { id: 'sd-scaling', name: 'Scaling Basics (Vertical vs Horizontal)' },
+        { id: 'sd-load-balancing', name: 'Load Balancing Strategies' },
+        { id: 'sd-caching', name: 'Caching (Redis, Memcached, CDN)' },
+        { id: 'sd-database-design', name: 'Database Design (SQL vs NoSQL)' },
+        { id: 'sd-sharding', name: 'Database Sharding & Partitioning' },
+        { id: 'sd-consistent-hashing', name: 'Consistent Hashing' },
+        { id: 'sd-cap-theorem', name: 'CAP Theorem & Trade-offs' },
+        { id: 'sd-message-queues', name: 'Message Queues (Kafka, RabbitMQ)' },
+        { id: 'sd-microservices', name: 'Microservices vs Monolith' },
+        { id: 'sd-api-design', name: 'API Design (REST, GraphQL, gRPC)' },
+        { id: 'sd-auth', name: 'Authentication & Authorization (OAuth, JWT)' },
+        { id: 'sd-monitoring', name: 'Logging, Monitoring & Alerting' },
+      ]
+    }
+  ];
+
+  // ============================================================
+  // STATE MANAGEMENT
+  // ============================================================
+  const STORAGE_KEY = 'interviewPrepTracker';
+  const START_DATE = '2026-05-20';
+
+  function getDefaultState() {
+    return {
+      startDate: START_DATE,
+      settings: {
+        weekendsOff: true,
+        dailyProblemTarget: 4,
+        dailySystemDesignMinutes: 60,
+        dailyJsMinutes: 60
+      },
+      dailyLogs: {},
+      completedProblems: [],
+      completedSystemDesign: [],
+      activeList: 'blind75',
+      milestonesShown: []
+    };
+  }
+
+  let state = getDefaultState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = { ...getDefaultState(), ...parsed };
+      }
+    } catch (e) {
+      console.error('Failed to load state:', e);
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error('Failed to save state:', e);
+    }
+  }
+
+  // ============================================================
+  // UTILITIES
+  // ============================================================
+  function todayStr() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+
+  function isWeekend(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const day = d.getDay();
+    return day === 0 || day === 6;
+  }
+
+  function daysBetween(d1, d2) {
+    const a = new Date(d1 + 'T00:00:00');
+    const b = new Date(d2 + 'T00:00:00');
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatDateLabel(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+  function shortMonth(monthIndex) {
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][monthIndex];
+  }
+
+  function getProblemsForList(listId) {
+    return CATEGORIES.map(cat => ({
+      ...cat,
+      problems: cat.problems.filter(p => listId === 'neetcode150' ? true : p.blind75)
+    })).filter(cat => cat.problems.length > 0);
+  }
+
+  function getTotalProblems(listId) {
+    return getProblemsForList(listId).reduce((sum, cat) => sum + cat.problems.length, 0);
+  }
+
+  function getCompletedInCategory(cat) {
+    return cat.problems.filter(p => state.completedProblems.includes(p.id)).length;
+  }
+
+  function getDayActivity(dateStr) {
+    const log = state.dailyLogs[dateStr];
+    if (!log) return 0;
+    let count = 0;
+    if (log.neetcode && log.neetcode.problemsSolved && log.neetcode.problemsSolved.length > 0) count++;
+    if (log.systemDesign && log.systemDesign.minutes > 0) count++;
+    if (log.jsReact && log.jsReact.minutes > 0) count++;
+    return count;
+  }
+
+  // ============================================================
+  // STREAK CALCULATOR
+  // ============================================================
+  function calculateStreaks() {
+    const today = todayStr();
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+
+    // Walk backward from today
+    let d = today;
+    let checkingCurrent = true;
+
+    // First check if today has activity (if today is a weekday)
+    // or if it's a weekend, skip it
+    while (true) {
+      const isWknd = isWeekend(d);
+      const activity = getDayActivity(d);
+
+      if (isWknd && state.settings.weekendsOff) {
+        // Skip weekends, don't break or extend streak
+        d = addDays(d, -1);
+        if (daysBetween(state.startDate, d) < 0) break;
+        continue;
+      }
+
+      if (activity > 0) {
+        if (checkingCurrent) currentStreak++;
+        tempStreak++;
+      } else {
+        // No activity on a weekday
+        if (checkingCurrent && d === today) {
+          // Today has no activity yet — don't count it, but don't break streak
+          d = addDays(d, -1);
+          if (daysBetween(state.startDate, d) < 0) break;
+          continue;
+        }
+        checkingCurrent = false;
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 0;
+      }
+      d = addDays(d, -1);
+      if (daysBetween(state.startDate, d) < 0) break;
+    }
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    // Recalculate current streak more accurately
+    currentStreak = 0;
+    d = today;
+    // If today is weekend and no activity, start from previous day
+    if (isWeekend(today) && state.settings.weekendsOff && getDayActivity(today) === 0) {
+      // find last weekday
+      while (isWeekend(d)) d = addDays(d, -1);
+    } else if (getDayActivity(today) === 0 && !isWeekend(today)) {
+      // Today is weekday with no activity — streak might still be alive if it's still during the day
+      // Check yesterday
+      d = addDays(d, -1);
+    }
+
+    while (daysBetween(state.startDate, d) >= 0) {
+      if (isWeekend(d) && state.settings.weekendsOff) {
+        d = addDays(d, -1);
+        continue;
+      }
+      if (getDayActivity(d) > 0) {
+        currentStreak++;
+        d = addDays(d, -1);
+      } else {
+        break;
+      }
+    }
+
+    longestStreak = Math.max(longestStreak, currentStreak);
+    return { currentStreak, longestStreak };
+  }
+
+  // ============================================================
+  // RENDER: HERO HEADER
+  // ============================================================
+  function renderHero() {
+    const today = todayStr();
+    const elapsed = daysBetween(state.startDate, today);
+    const dayNum = elapsed + 1;
+    document.getElementById('subtitle').textContent =
+      `Day ${dayNum} of prep • Started May 20, 2026`;
+
+    const totalSolved = state.completedProblems.length;
+    const totalSDDone = state.completedSystemDesign.length;
+    const totalHours = Object.values(state.dailyLogs).reduce((sum, log) => {
+      let mins = 0;
+      if (log.neetcode) mins += (log.neetcode.minutes || 0);
+      if (log.systemDesign) mins += (log.systemDesign.minutes || 0);
+      if (log.jsReact) mins += (log.jsReact.minutes || 0);
+      return sum + mins;
+    }, 0);
+    const daysActive = Object.keys(state.dailyLogs).filter(d => getDayActivity(d) > 0).length;
+
+    document.getElementById('quick-stats').innerHTML = `
+      <div class="quick-stat"><div class="value">${daysActive}</div><div class="label">Days Active</div></div>
+      <div class="quick-stat"><div class="value">${totalSolved}</div><div class="label">Problems Solved</div></div>
+      <div class="quick-stat"><div class="value">${totalSDDone}</div><div class="label">SD Topics</div></div>
+      <div class="quick-stat"><div class="value">${Math.round(totalHours/60*10)/10}</div><div class="label">Hours Logged</div></div>
+    `;
+  }
+
+  // ============================================================
+  // RENDER: STREAK BAR
+  // ============================================================
+  function renderStreakBar() {
+    const { currentStreak, longestStreak } = calculateStreaks();
+    const today = todayStr();
+    const isWknd = isWeekend(today);
+    const todayActivity = getDayActivity(today);
+
+    let nudge = '';
+    if (isWknd && state.settings.weekendsOff) {
+      nudge = todayActivity > 0
+        ? '<div class="streak-nudge">⭐ Weekend bonus! You\'re putting in extra work!</div>'
+        : '<div class="streak-nudge rest-day">😴 Rest Day — Enjoy your weekend! Streak is safe.</div>';
+    } else if (todayActivity === 0) {
+      nudge = '<div class="streak-nudge">⚡ Don\'t break the streak! Log today\'s progress.</div>';
+    } else if (todayActivity < 3) {
+      nudge = `<div class="streak-nudge">Almost there! ${3 - todayActivity} more track${3 - todayActivity > 1 ? 's' : ''} to go today.</div>`;
+    } else {
+      nudge = '<div class="streak-nudge" style="color:var(--green-main)">🎯 All 3 tracks done today — great work!</div>';
+    }
+
+    document.getElementById('streak-bar').innerHTML = `
+      <div class="streak-item">
+        <span class="streak-fire">${currentStreak > 0 ? '🔥' : '💤'}</span>
+        <div>
+          <div class="streak-number">${currentStreak}</div>
+          <div class="streak-label">Current Streak (weekdays)</div>
+        </div>
+      </div>
+      <div class="streak-item">
+        <span style="font-size:1.5rem">🏆</span>
+        <div>
+          <div class="streak-number" style="color:var(--amber-main)">${longestStreak}</div>
+          <div class="streak-label">Longest Streak</div>
+        </div>
+      </div>
+      ${nudge}
+    `;
+  }
+
+  // ============================================================
+  // RENDER: TRACK PROGRESS CARDS
+  // ============================================================
+  function renderTrackCards() {
+    const total75 = getTotalProblems('blind75');
+    const total150 = getTotalProblems('neetcode150');
+    const blind75Solved = CATEGORIES.flatMap(c => c.problems.filter(p => p.blind75))
+      .filter(p => state.completedProblems.includes(p.id)).length;
+    const n150Solved = state.completedProblems.length;
+
+    const activeTotal = state.activeList === 'blind75' ? total75 : total150;
+    const activeSolved = state.activeList === 'blind75' ? blind75Solved : n150Solved;
+    const pct = activeTotal > 0 ? Math.round((activeSolved / activeTotal) * 100) : 0;
+    const circumference = 2 * Math.PI * 24;
+    const offset = circumference - (pct / 100) * circumference;
+
+    // System design
+    const sdTotal = SYSTEM_DESIGN_TOPICS.reduce((s, g) => s + g.topics.length, 0);
+    const sdDone = state.completedSystemDesign.length;
+    const sdPct = sdTotal > 0 ? Math.round((sdDone / sdTotal) * 100) : 0;
+    const sdOffset = circumference - (sdPct / 100) * circumference;
+
+    // JS/React hours
+    const jsMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
+      s + (l.jsReact ? (l.jsReact.minutes || 0) : 0), 0);
+    const jsHours = Math.round(jsMinutes / 60 * 10) / 10;
+    const jsSessions = Object.values(state.dailyLogs).filter(l =>
+      l.jsReact && l.jsReact.minutes > 0).length;
+
+    document.getElementById('track-grid').innerHTML = `
+      <div class="card track-card neetcode">
+        <div class="track-header">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="track-icon">💻</span>
+            <span class="track-title">Neetcode DSA</span>
+          </div>
+          <span class="track-count" style="color:var(--green-main)">${activeSolved}/${activeTotal}</span>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="var(--green-main)" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <div class="progress-info">
+            <div class="progress-pct" style="color:var(--green-main)">${pct}%</div>
+            <div class="progress-detail">${state.activeList === 'blind75' ? 'Blind 75' : 'Neetcode 150'}</div>
+          </div>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--green-dark),var(--green-light))"></div></div>
+        <div class="category-mini"><span>${activeSolved} solved</span><span>${activeTotal - activeSolved} remaining</span></div>
+      </div>
+
+      <div class="card track-card sysdesign">
+        <div class="track-header">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="track-icon">🏗️</span>
+            <span class="track-title">System Design</span>
+          </div>
+          <span class="track-count" style="color:var(--blue-main)">${sdDone}/${sdTotal}</span>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="var(--blue-main)" stroke-dasharray="${circumference}" stroke-dashoffset="${sdOffset}"/>
+          </svg>
+          <div class="progress-info">
+            <div class="progress-pct" style="color:var(--blue-main)">${sdPct}%</div>
+            <div class="progress-detail">Topics covered</div>
+          </div>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${sdPct}%;background:linear-gradient(90deg,var(--blue-dark),var(--blue-light))"></div></div>
+        <div class="category-mini"><span>${sdDone} covered</span><span>${sdTotal - sdDone} remaining</span></div>
+      </div>
+
+      <div class="card track-card jsreact">
+        <div class="track-header">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="track-icon">⚛️</span>
+            <span class="track-title">JS / React</span>
+          </div>
+          <span class="track-count" style="color:var(--amber-main)">${jsHours}h</span>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="var(--amber-main)" stroke-dasharray="${circumference}"
+              stroke-dashoffset="${circumference - Math.min(1, jsHours / 50) * circumference}"/>
+          </svg>
+          <div class="progress-info">
+            <div class="progress-pct" style="color:var(--amber-main)">${jsHours}h</div>
+            <div class="progress-detail">${jsSessions} sessions</div>
+          </div>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${Math.min(100, jsHours / 50 * 100)}%;background:linear-gradient(90deg,var(--amber-dark),var(--amber-light))"></div></div>
+        <div class="category-mini"><span>${jsSessions} sessions</span><span>${jsMinutes} total mins</span></div>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  // RENDER: HEATMAP
+  // ============================================================
+  function renderHeatmap() {
+    const wrapper = document.getElementById('heatmap-wrapper');
+    const today = todayStr();
+    const startDate = new Date(state.startDate + 'T00:00:00');
+
+    // Go back to the most recent Sunday before startDate for alignment
+    const gridStart = new Date(startDate);
+    while (gridStart.getDay() !== 0) gridStart.setDate(gridStart.getDate() - 1);
+
+    // Go forward to at least 20 weeks from start
+    const gridEnd = new Date(today + 'T00:00:00');
+    gridEnd.setDate(gridEnd.getDate() + (7 - gridEnd.getDay()) % 7 + 14); // Add 2 extra weeks
+
+    const totalDays = Math.ceil((gridEnd - gridStart) / (1000*60*60*24));
+    const weeks = Math.ceil(totalDays / 7);
+
+    let html = '<div class="heatmap-grid">';
+    const d = new Date(gridStart);
+
+    for (let i = 0; i < weeks * 7; i++) {
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const beforeStart = d < startDate;
+      const isFuture = dateStr > today;
+      const isToday = dateStr === today;
+      const isWknd = isWeekend(dateStr);
+      const activity = getDayActivity(dateStr);
+
+      let levelClass = '';
+      if (!beforeStart && !isFuture) {
+        if (activity === 1) levelClass = 'level-1';
+        else if (activity === 2) levelClass = 'level-2';
+        else if (activity >= 3) levelClass = 'level-3';
+      }
+
+      let extraClasses = '';
+      if (isWknd) extraClasses += ' weekend';
+      if (isFuture) extraClasses += ' future';
+      if (isToday) extraClasses += ' today';
+      if (beforeStart) extraClasses += ' future';
+
+      html += `<div class="heatmap-cell ${levelClass}${extraClasses}" data-date="${dateStr}" data-activity="${activity}"></div>`;
+      d.setDate(d.getDate() + 1);
+    }
+
+    html += '</div>';
+    wrapper.innerHTML = html;
+
+    // Tooltip
+    const tooltip = document.getElementById('heatmap-tooltip');
+    wrapper.addEventListener('mouseover', (e) => {
+      const cell = e.target.closest('.heatmap-cell');
+      if (!cell) { tooltip.style.display = 'none'; return; }
+      const date = cell.dataset.date;
+      const log = state.dailyLogs[date];
+      const isWknd = isWeekend(date);
+
+      let text = `<strong>${formatDateLabel(date)}</strong>`;
+      if (isWknd) text += ' (Weekend)';
+      text += '<br>';
+
+      if (log) {
+        if (log.neetcode && log.neetcode.problemsSolved && log.neetcode.problemsSolved.length > 0) {
+          text += `✅ ${log.neetcode.problemsSolved.length} problem(s) solved<br>`;
+        }
+        if (log.systemDesign && log.systemDesign.minutes > 0) {
+          text += `🏗️ ${log.systemDesign.minutes} min System Design<br>`;
+          if (log.systemDesign.topic) text += `   → ${log.systemDesign.topic}<br>`;
+        }
+        if (log.jsReact && log.jsReact.minutes > 0) {
+          text += `⚛️ ${log.jsReact.minutes} min JS/React<br>`;
+          if (log.jsReact.topic) text += `   → ${log.jsReact.topic}<br>`;
+        }
+        if (!log.neetcode?.problemsSolved?.length && !log.systemDesign?.minutes && !log.jsReact?.minutes) {
+          text += 'No activity logged';
+        }
+      } else {
+        text += date > todayStr() ? 'Upcoming' : (date < state.startDate ? '' : 'No activity logged');
+      }
+
+      tooltip.innerHTML = text;
+      tooltip.style.display = 'block';
+      const rect = cell.getBoundingClientRect();
+      tooltip.style.left = rect.left + rect.width/2 - tooltip.offsetWidth/2 + 'px';
+      tooltip.style.top = rect.top - tooltip.offsetHeight - 8 + 'px';
+    });
+    wrapper.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
+  }
+
+  // ============================================================
+  // RENDER: DAILY CHECK-IN
+  // ============================================================
+  let selectedDate = todayStr();
+
+  function renderCheckin() {
+    const dateInput = document.getElementById('checkin-date');
+    dateInput.value = selectedDate;
+    const label = document.getElementById('checkin-day-label');
+    const isWknd = isWeekend(selectedDate);
+    label.textContent = formatDateLabel(selectedDate) + (isWknd ? ' 🏖️ Weekend' : '');
+
+    const log = state.dailyLogs[selectedDate] || { neetcode: { problemsSolved: [], minutes: 0, notes: '' }, systemDesign: { topic: '', minutes: 0, notes: '' }, jsReact: { topic: '', minutes: 0, notes: '' } };
+
+    document.getElementById('checkin-grid').innerHTML = `
+      <div class="card checkin-card neetcode">
+        <div class="checkin-title"><span class="dot"></span> Neetcode DSA</div>
+        <div class="form-group">
+          <label>Problems Solved Today</label>
+          <select id="checkin-problem-cat" style="margin-bottom:0.5rem">
+            <option value="">-- Select Category --</option>
+            ${getProblemsForList(state.activeList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
+          </select>
+          <div id="checkin-problem-list" style="max-height:200px;overflow-y:auto;margin-top:0.5rem;"></div>
+        </div>
+        <div class="form-group">
+          <label>Minutes Spent</label>
+          <div class="minute-input-group">
+            <input type="number" id="checkin-nc-mins" min="0" value="${log.neetcode.minutes || 0}">
+            <span>minutes</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="checkin-nc-notes" placeholder="What patterns did you learn?">${log.neetcode.notes || ''}</textarea>
+        </div>
+      </div>
+
+      <div class="card checkin-card sysdesign">
+        <div class="checkin-title"><span class="dot"></span> System Design</div>
+        <div class="form-group">
+          <label>Topic Covered</label>
+          <input type="text" id="checkin-sd-topic" placeholder="e.g., URL Shortener" value="${log.systemDesign.topic || ''}">
+        </div>
+        <div class="form-group">
+          <label>Minutes Spent</label>
+          <div class="minute-input-group">
+            <input type="number" id="checkin-sd-mins" min="0" value="${log.systemDesign.minutes || 0}">
+            <span>minutes</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="checkin-sd-notes" placeholder="Key takeaways...">${log.systemDesign.notes || ''}</textarea>
+        </div>
+      </div>
+
+      <div class="card checkin-card jsreact">
+        <div class="checkin-title"><span class="dot"></span> JS / React</div>
+        <div class="form-group">
+          <label>What did you work on?</label>
+          <input type="text" id="checkin-js-topic" placeholder="e.g., Built todo list component" value="${log.jsReact.topic || ''}">
+        </div>
+        <div class="form-group">
+          <label>Minutes Spent</label>
+          <div class="minute-input-group">
+            <input type="number" id="checkin-js-mins" min="0" value="${log.jsReact.minutes || 0}">
+            <span>minutes</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="checkin-js-notes" placeholder="What did you learn?">${log.jsReact.notes || ''}</textarea>
+        </div>
+      </div>
+    `;
+
+    // Problem category change
+    document.getElementById('checkin-problem-cat').addEventListener('change', (e) => {
+      renderCheckinProblems(e.target.value, log);
+    });
+  }
+
+  function renderCheckinProblems(catId, log) {
+    const container = document.getElementById('checkin-problem-list');
+    if (!catId) { container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">Select a category to see problems</span>'; return; }
+
+    const cats = getProblemsForList(state.activeList);
+    const cat = cats.find(c => c.id === catId);
+    if (!cat) return;
+
+    const solved = log.neetcode.problemsSolved || [];
+
+    container.innerHTML = cat.problems.map(p => {
+      const checked = state.completedProblems.includes(p.id) || solved.includes(p.id);
+      return `
+        <div class="problem-item" style="padding:0.35rem 0.5rem">
+          <input type="checkbox" id="checkin-p-${p.id}" data-problem-id="${p.id}" ${checked ? 'checked' : ''}>
+          <span class="problem-name ${checked ? 'solved' : ''}" style="font-size:0.8rem">${p.name}</span>
+          <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============================================================
+  // RENDER: PROBLEM ROADMAP
+  // ============================================================
+  function renderRoadmap() {
+    // List toggle
+    document.getElementById('list-toggle').innerHTML = `
+      <button class="${state.activeList === 'blind75' ? 'active' : ''}" data-list="blind75">Blind 75</button>
+      <button class="${state.activeList === 'neetcode150' ? 'active' : ''}" data-list="neetcode150">Neetcode 150</button>
+    `;
+
+    const cats = getProblemsForList(state.activeList);
+    const container = document.getElementById('roadmap-categories');
+    container.innerHTML = cats.map(cat => {
+      const completed = getCompletedInCategory(cat);
+      const total = cat.problems.length;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      return `
+        <div class="category-accordion">
+          <button class="category-header" data-cat="${cat.id}">
+            <span class="chevron">▶</span>
+            <span class="cat-name">${cat.name}</span>
+            <span class="cat-progress">${completed}/${total}</span>
+            <div class="cat-bar"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+          </button>
+          <div class="category-problems" id="cat-${cat.id}">
+            <div class="category-problems-inner">
+              ${cat.problems.map(p => {
+                const isSolved = state.completedProblems.includes(p.id);
+                return `
+                  <div class="problem-item">
+                    <input type="checkbox" data-problem-id="${p.id}" ${isSolved ? 'checked' : ''}>
+                    <span class="problem-name ${isSolved ? 'solved' : ''}">${p.name}</span>
+                    <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
+                    <a class="problem-link" href="https://neetcode.io/problems/${p.id}" target="_blank" rel="noopener">↗ neetcode</a>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Accordion toggle
+    container.querySelectorAll('.category-header').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const catId = btn.dataset.cat;
+        const panel = document.getElementById('cat-' + catId);
+        const chevron = btn.querySelector('.chevron');
+        panel.classList.toggle('open');
+        chevron.classList.toggle('open');
+      });
+    });
+
+    // Checkbox toggle in roadmap
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const pid = cb.dataset.problemId;
+        if (cb.checked && !state.completedProblems.includes(pid)) {
+          state.completedProblems.push(pid);
+        } else if (!cb.checked) {
+          state.completedProblems = state.completedProblems.filter(id => id !== pid);
+        }
+        saveState();
+        renderAll();
+        checkMilestones();
+      });
+    });
+
+    // List toggle
+    document.getElementById('list-toggle').querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeList = btn.dataset.list;
+        saveState();
+        renderRoadmap();
+        renderTrackCards();
+      });
+    });
+  }
+
+  // ============================================================
+  // RENDER: SYSTEM DESIGN ROADMAP
+  // ============================================================
+  function renderSDRoadmap() {
+    const container = document.getElementById('sd-roadmap');
+    const sdTotal = SYSTEM_DESIGN_TOPICS.reduce((s, g) => s + g.topics.length, 0);
+    const sdDone = state.completedSystemDesign.length;
+
+    container.innerHTML = `
+      <div style="margin-bottom:1rem;font-size:0.85rem;color:var(--text-secondary)">
+        ${sdDone}/${sdTotal} topics covered
+      </div>
+      ${SYSTEM_DESIGN_TOPICS.map(group => `
+        <div class="sd-topic-group">
+          <div class="sd-topic-group-title">${group.group}</div>
+          ${group.topics.map(t => {
+            const done = state.completedSystemDesign.includes(t.id);
+            return `
+              <div class="sd-topic-item">
+                <input type="checkbox" data-sd-id="${t.id}" ${done ? 'checked' : ''}>
+                <span class="sd-name ${done ? 'solved' : ''}">${t.name}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `).join('')}
+    `;
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const sid = cb.dataset.sdId;
+        if (cb.checked && !state.completedSystemDesign.includes(sid)) {
+          state.completedSystemDesign.push(sid);
+        } else if (!cb.checked) {
+          state.completedSystemDesign = state.completedSystemDesign.filter(id => id !== sid);
+        }
+        saveState();
+        renderTrackCards();
+      });
+    });
+  }
+
+  // ============================================================
+  // MILESTONES & CONFETTI
+  // ============================================================
+  function checkMilestones() {
+    const total = getTotalProblems(state.activeList);
+    const solved = state.activeList === 'blind75'
+      ? CATEGORIES.flatMap(c => c.problems.filter(p => p.blind75)).filter(p => state.completedProblems.includes(p.id)).length
+      : state.completedProblems.length;
+    const pct = Math.round((solved / total) * 100);
+
+    const milestones = [25, 50, 75, 100];
+    for (const m of milestones) {
+      const key = `${state.activeList}-${m}`;
+      if (pct >= m && !state.milestonesShown.includes(key)) {
+        state.milestonesShown.push(key);
+        saveState();
+        fireCelebration(m);
+        break;
+      }
+    }
+  }
+
+  function fireCelebration(pct) {
+    if (typeof confetti === 'function') {
+      const colors = pct === 100
+        ? ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444']
+        : ['#10b981', '#34d399', '#059669'];
+
+      confetti({ particleCount: pct === 100 ? 200 : 100, spread: 80, origin: { y: 0.6 }, colors });
+      if (pct === 100) {
+        setTimeout(() => confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, colors }), 300);
+        setTimeout(() => confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, colors }), 500);
+      }
+    }
+  }
+
+  // ============================================================
+  // SAVE CHECK-IN
+  // ============================================================
+  function saveCheckin() {
+    const log = state.dailyLogs[selectedDate] || {
+      neetcode: { problemsSolved: [], minutes: 0, notes: '' },
+      systemDesign: { topic: '', minutes: 0, notes: '' },
+      jsReact: { topic: '', minutes: 0, notes: '' }
+    };
+
+    // Gather checked problems from the checkin area
+    const checkinProblems = document.querySelectorAll('#checkin-problem-list input[type="checkbox"]');
+    const solvedToday = [];
+    checkinProblems.forEach(cb => {
+      if (cb.checked) {
+        solvedToday.push(cb.dataset.problemId);
+        if (!state.completedProblems.includes(cb.dataset.problemId)) {
+          state.completedProblems.push(cb.dataset.problemId);
+        }
+      }
+    });
+
+    log.neetcode.problemsSolved = solvedToday.length > 0 ? solvedToday : (log.neetcode.problemsSolved || []);
+    log.neetcode.minutes = parseInt(document.getElementById('checkin-nc-mins').value) || 0;
+    log.neetcode.notes = document.getElementById('checkin-nc-notes').value;
+
+    log.systemDesign.topic = document.getElementById('checkin-sd-topic').value;
+    log.systemDesign.minutes = parseInt(document.getElementById('checkin-sd-mins').value) || 0;
+    log.systemDesign.notes = document.getElementById('checkin-sd-notes').value;
+
+    log.jsReact.topic = document.getElementById('checkin-js-topic').value;
+    log.jsReact.minutes = parseInt(document.getElementById('checkin-js-mins').value) || 0;
+    log.jsReact.notes = document.getElementById('checkin-js-notes').value;
+
+    state.dailyLogs[selectedDate] = log;
+    saveState();
+
+    // Show feedback
+    const fb = document.getElementById('save-feedback');
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 2000);
+
+    renderAll();
+    checkMilestones();
+  }
+
+  // ============================================================
+  // EXPORT / IMPORT / RESET
+  // ============================================================
+  function exportData() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `interview-prep-tracker-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        state = { ...getDefaultState(), ...imported };
+        saveState();
+        renderAll();
+        alert('Data imported successfully!');
+      } catch (err) {
+        alert('Invalid JSON file. Please check the file and try again.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetAll() {
+    localStorage.removeItem(STORAGE_KEY);
+    state = getDefaultState();
+    saveState();
+    renderAll();
+    document.getElementById('reset-modal').classList.remove('show');
+  }
+
+  // ============================================================
+  // TABS
+  // ============================================================
+  function initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  }
+
+  // ============================================================
+  // GITHUB GIST SYNC
+  // ============================================================
+  const SYNC_TOKEN_KEY = 'interviewPrepTracker_ghToken';
+  const SYNC_GIST_KEY = 'interviewPrepTracker_gistId';
+  const GIST_FILENAME = 'interview-prep-tracker-data.json';
+  const GITHUB_API = 'https://api.github.com';
+
+  function getSyncToken() { return localStorage.getItem(SYNC_TOKEN_KEY) || ''; }
+  function getSyncGistId() { return localStorage.getItem(SYNC_GIST_KEY) || ''; }
+  function setSyncToken(t) { localStorage.setItem(SYNC_TOKEN_KEY, t); }
+  function setSyncGistId(id) { localStorage.setItem(SYNC_GIST_KEY, id); }
+  function clearSyncConfig() { localStorage.removeItem(SYNC_TOKEN_KEY); localStorage.removeItem(SYNC_GIST_KEY); }
+
+  function updateSyncUI(status, text) {
+    const dot = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-status-text');
+    dot.className = 'sync-dot';
+    if (status === 'connected') { dot.classList.add('connected'); }
+    else if (status === 'syncing') { dot.classList.add('syncing'); }
+    else if (status === 'error') { dot.classList.add('error'); }
+    label.textContent = text;
+  }
+
+  function setSyncBtnLoading(loading) {
+    const btn = document.getElementById('sync-btn');
+    if (loading) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin">⟳</span> Syncing…';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '☁️ Sync';
+    }
+  }
+
+  function renderSyncStatus() {
+    const token = getSyncToken();
+    const gistId = getSyncGistId();
+    if (token && gistId) {
+      updateSyncUI('connected', 'Connected to Gist');
+    } else if (token) {
+      updateSyncUI('connected', 'Token set — will create Gist on sync');
+    } else {
+      updateSyncUI('', 'Not connected');
+    }
+  }
+
+  async function gistRequest(method, path, body) {
+    const token = getSyncToken();
+    if (!token) throw new Error('No GitHub token configured');
+    const opts = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json'
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${GITHUB_API}${path}`, opts);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub API error ${res.status}`);
+    }
+    return res.json();
+  }
+
+  async function createGist() {
+    const data = await gistRequest('POST', '/gists', {
+      description: 'Interview Prep Tracker — auto-synced data',
+      public: false,
+      files: { [GIST_FILENAME]: { content: JSON.stringify(state, null, 2) } }
+    });
+    setSyncGistId(data.id);
+    return data;
+  }
+
+  async function pushToGist() {
+    const gistId = getSyncGistId();
+    if (!gistId) return await createGist();
+    return await gistRequest('PATCH', `/gists/${gistId}`, {
+      files: { [GIST_FILENAME]: { content: JSON.stringify(state, null, 2) } }
+    });
+  }
+
+  async function pullFromGist() {
+    const gistId = getSyncGistId();
+    if (!gistId) throw new Error('No Gist ID — sync first to create one');
+    const data = await gistRequest('GET', `/gists/${gistId}`);
+    const file = data.files[GIST_FILENAME];
+    if (!file) throw new Error(`File "${GIST_FILENAME}" not found in Gist`);
+    return JSON.parse(file.content);
+  }
+
+  async function doSync() {
+    const token = getSyncToken();
+    if (!token) {
+      document.getElementById('sync-modal').classList.add('show');
+      return;
+    }
+    setSyncBtnLoading(true);
+    updateSyncUI('syncing', 'Syncing…');
+    try {
+      const gistId = getSyncGistId();
+      if (gistId) {
+        // Pull remote, merge (remote wins for conflicts based on timestamp)
+        const remote = await pullFromGist();
+        const localTs = state.lastSyncedAt || 0;
+        const remoteTs = remote.lastSyncedAt || 0;
+        if (remoteTs > localTs) {
+          // Remote is newer — adopt remote, but keep local-only changes
+          state = { ...getDefaultState(), ...remote };
+          saveState();
+          renderAll();
+        }
+      }
+      // Now push current local state
+      state.lastSyncedAt = Date.now();
+      saveState();
+      await pushToGist();
+      updateSyncUI('connected', `Synced — ${new Date().toLocaleTimeString()}`);
+    } catch (err) {
+      console.error('Sync failed:', err);
+      updateSyncUI('error', `Sync failed: ${err.message}`);
+    } finally {
+      setSyncBtnLoading(false);
+    }
+  }
+
+  function initSync() {
+    renderSyncStatus();
+
+    // Sync button
+    document.getElementById('sync-btn').addEventListener('click', doSync);
+
+    // Settings button opens modal
+    document.getElementById('sync-settings-btn').addEventListener('click', () => {
+      const modal = document.getElementById('sync-modal');
+      document.getElementById('sync-token-input').value = getSyncToken();
+      document.getElementById('sync-gist-id-input').value = getSyncGistId();
+      // Show connected banner if applicable
+      const banner = document.getElementById('sync-connected-banner');
+      const gistId = getSyncGistId();
+      if (gistId) {
+        banner.style.display = 'flex';
+        document.getElementById('sync-gist-id-display').textContent = gistId;
+      } else {
+        banner.style.display = 'none';
+      }
+      modal.classList.add('show');
+    });
+
+    // Token visibility toggle
+    document.getElementById('token-toggle-btn').addEventListener('click', () => {
+      const inp = document.getElementById('sync-token-input');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+
+    // Modal cancel
+    document.getElementById('sync-modal-cancel').addEventListener('click', () => {
+      document.getElementById('sync-modal').classList.remove('show');
+    });
+
+    // Modal save
+    document.getElementById('sync-modal-save').addEventListener('click', () => {
+      const token = document.getElementById('sync-token-input').value.trim();
+      const gistId = document.getElementById('sync-gist-id-input').value.trim();
+      if (!token) {
+        alert('Please enter a GitHub Personal Access Token.');
+        return;
+      }
+      setSyncToken(token);
+      if (gistId) setSyncGistId(gistId);
+      document.getElementById('sync-modal').classList.remove('show');
+      renderSyncStatus();
+      // Auto-sync after connecting
+      doSync();
+    });
+
+    // Disconnect
+    document.getElementById('sync-disconnect-btn').addEventListener('click', () => {
+      if (confirm('Disconnect from GitHub Gist? Your local data will be kept.')) {
+        clearSyncConfig();
+        document.getElementById('sync-modal').classList.remove('show');
+        renderSyncStatus();
+      }
+    });
+  }
+
+  // ============================================================
+  // RENDER ALL
+  // ============================================================
+  function renderAll() {
+    renderHero();
+    renderStreakBar();
+    renderTrackCards();
+    renderHeatmap();
+    renderCheckin();
+    renderRoadmap();
+    renderSDRoadmap();
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  function init() {
+    loadState();
+    renderAll();
+    initTabs();
+    initSync();
+
+    // Date navigation
+    document.getElementById('checkin-date').addEventListener('change', (e) => {
+      selectedDate = e.target.value;
+      renderCheckin();
+    });
+    document.getElementById('date-prev').addEventListener('click', () => {
+      selectedDate = addDays(selectedDate, -1);
+      renderCheckin();
+    });
+    document.getElementById('date-next').addEventListener('click', () => {
+      selectedDate = addDays(selectedDate, 1);
+      renderCheckin();
+    });
+
+    // Save (also auto-syncs if connected)
+    document.getElementById('save-checkin').addEventListener('click', () => {
+      saveCheckin();
+      if (getSyncToken()) doSync();
+    });
+
+    // Export / Import / Reset
+    document.getElementById('export-btn').addEventListener('click', exportData);
+    document.getElementById('import-btn').addEventListener('click', () => {
+      document.getElementById('import-file').click();
+    });
+    document.getElementById('import-file').addEventListener('change', (e) => {
+      if (e.target.files[0]) importData(e.target.files[0]);
+    });
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      document.getElementById('reset-modal').classList.add('show');
+    });
+    document.getElementById('reset-cancel').addEventListener('click', () => {
+      document.getElementById('reset-modal').classList.remove('show');
+    });
+    document.getElementById('reset-confirm').addEventListener('click', resetAll);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
