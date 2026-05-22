@@ -981,6 +981,16 @@
     }
   }
 
+  function removeSolvedProblem(pid) {
+    state.completedProblems = state.completedProblems.filter(id => id !== pid);
+    for (const date in state.dailyLogs) {
+      const log = state.dailyLogs[date];
+      if (log.neetcode && log.neetcode.problemsSolved) {
+        log.neetcode.problemsSolved = log.neetcode.problemsSolved.filter(id => id !== pid);
+      }
+    }
+  }
+
   // ============================================================
   // UTILITIES
   // ============================================================
@@ -1211,6 +1221,10 @@
     const sdPct = sdTotal > 0 ? Math.round((sdDone / sdTotal) * 100) : 0;
     const sdOffset = circumference - (sdPct / 100) * circumference;
 
+    const sdMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
+      s + (l.systemDesign ? (l.systemDesign.minutes || 0) : 0), 0);
+    const sdHours = Math.round(sdMinutes / 60 * 10) / 10;
+
     // JS/React hours
     const jsMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
       s + (l.jsReact ? (l.jsReact.minutes || 0) : 0), 0);
@@ -1258,11 +1272,11 @@
           </svg>
           <div class="progress-info">
             <div class="progress-pct" style="color:var(--blue-main)">${sdPct}%</div>
-            <div class="progress-detail">Topics covered</div>
+            <div class="progress-detail">Topics (${sdHours}h logged)</div>
           </div>
         </div>
         <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${sdPct}%;background:linear-gradient(90deg,var(--blue-dark),var(--blue-light))"></div></div>
-        <div class="category-mini"><span>${sdDone} covered</span><span>${sdTotal - sdDone} remaining</span></div>
+        <div class="category-mini"><span>${sdDone} covered (${sdHours}h logged)</span><span>${sdTotal - sdDone} remaining</span></div>
       </div>
 
       <div class="card track-card jsreact">
@@ -1473,14 +1487,44 @@
     const cat = cats.find(c => c.id === catId);
     if (!cat) return;
 
-    const solved = log.neetcode.problemsSolved || [];
+    const solvedToday = log.neetcode.problemsSolved || [];
+
+    // Helper to find which date a problem was solved on
+    const getSolvedDate = (pid) => {
+      for (const date in state.dailyLogs) {
+        if (date === selectedDate) continue;
+        const dLog = state.dailyLogs[date];
+        if (dLog.neetcode && dLog.neetcode.problemsSolved && dLog.neetcode.problemsSolved.includes(pid)) {
+          return date;
+        }
+      }
+      return null;
+    };
 
     container.innerHTML = cat.problems.map(p => {
-      const checked = state.completedProblems.includes(p.id) || solved.includes(p.id);
+      const isSolvedToday = solvedToday.includes(p.id);
+      const isSolvedElsewhere = state.completedProblems.includes(p.id) && !isSolvedToday;
+
+      let disabledAttr = '';
+      let checkedAttr = '';
+      let labelSuffix = '';
+      let solvedClass = '';
+
+      if (isSolvedToday) {
+        checkedAttr = 'checked';
+        solvedClass = 'solved';
+      } else if (isSolvedElsewhere) {
+        checkedAttr = 'checked';
+        disabledAttr = 'disabled';
+        solvedClass = 'solved';
+        const solvedDate = getSolvedDate(p.id);
+        labelSuffix = `<span style="font-size:0.75rem;color:var(--text-muted);margin-left:0.5rem">${solvedDate ? `(Solved on ${solvedDate})` : '(Solved on Roadmap)'}</span>`;
+      }
+
       return `
-        <div class="problem-item" style="padding:0.35rem 0.5rem">
-          <input type="checkbox" id="checkin-p-${p.id}" data-problem-id="${p.id}" ${checked ? 'checked' : ''}>
-          <span class="problem-name ${checked ? 'solved' : ''}" style="font-size:0.8rem">${p.name}</span>
+        <div class="problem-item" style="padding:0.35rem 0.5rem; ${isSolvedElsewhere ? 'opacity:0.7;cursor:not-allowed;' : ''}">
+          <input type="checkbox" id="checkin-p-${p.id}" data-problem-id="${p.id}" ${checkedAttr} ${disabledAttr}>
+          <span class="problem-name ${solvedClass}" style="font-size:0.8rem">${p.name}${labelSuffix}</span>
           <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
         </div>
       `;
@@ -1549,7 +1593,7 @@
         if (cb.checked && !state.completedProblems.includes(pid)) {
           state.completedProblems.push(pid);
         } else if (!cb.checked) {
-          state.completedProblems = state.completedProblems.filter(id => id !== pid);
+          removeSolvedProblem(pid);
         }
         saveState();
         renderAll();
@@ -1660,15 +1704,19 @@
     const checkinProblems = document.querySelectorAll('#checkin-problem-list input[type="checkbox"]');
     const solvedToday = [];
     checkinProblems.forEach(cb => {
+      if (cb.disabled) return; // Skip problems solved on other days
+      const pid = cb.dataset.problemId;
       if (cb.checked) {
-        solvedToday.push(cb.dataset.problemId);
-        if (!state.completedProblems.includes(cb.dataset.problemId)) {
-          state.completedProblems.push(cb.dataset.problemId);
+        solvedToday.push(pid);
+        if (!state.completedProblems.includes(pid)) {
+          state.completedProblems.push(pid);
         }
+      } else {
+        removeSolvedProblem(pid);
       }
     });
 
-    log.neetcode.problemsSolved = solvedToday.length > 0 ? solvedToday : (log.neetcode.problemsSolved || []);
+    log.neetcode.problemsSolved = solvedToday;
     log.neetcode.minutes = parseInt(document.getElementById('checkin-nc-mins').value) || 0;
     log.neetcode.notes = document.getElementById('checkin-nc-notes').value;
 
