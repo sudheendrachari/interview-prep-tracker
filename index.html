@@ -1438,7 +1438,10 @@
         <div class="checkin-title"><span class="dot"></span> System Design</div>
         <div class="form-group">
           <label>Topic Covered</label>
-          <input type="text" id="checkin-sd-topic" placeholder="e.g., URL Shortener" value="${log.systemDesign.topic || ''}">
+          <input type="text" id="checkin-sd-topic" list="sd-topics-list" placeholder="e.g., URL Shortener" value="${log.systemDesign.topic || ''}">
+          <datalist id="sd-topics-list">
+            ${SYSTEM_DESIGN_TOPICS.flatMap(g => g.topics).map(t => `<option value="${t.name}">`).join('')}
+          </datalist>
         </div>
         <div class="form-group">
           <label>Minutes Spent</label>
@@ -1720,9 +1723,40 @@
     log.neetcode.minutes = parseInt(document.getElementById('checkin-nc-mins').value) || 0;
     log.neetcode.notes = document.getElementById('checkin-nc-notes').value;
 
-    log.systemDesign.topic = document.getElementById('checkin-sd-topic').value;
+    const oldTopic = log.systemDesign.topic || '';
+    const newTopic = document.getElementById('checkin-sd-topic').value.trim();
+    
+    // Auto-link/cleanup System Design topic to/from roadmap
+    const allSdTopics = SYSTEM_DESIGN_TOPICS.flatMap(g => g.topics);
+
+    // 1. If old topic is changed/cleared, check if we should uncheck it from the roadmap
+    if (oldTopic && oldTopic.toLowerCase() !== newTopic.toLowerCase()) {
+      const matchedOld = allSdTopics.find(t => t.name.toLowerCase() === oldTopic.toLowerCase());
+      if (matchedOld) {
+        // Check if this topic is logged on any other date
+        const isLoggedElsewhere = Object.entries(state.dailyLogs).some(([date, l]) => {
+          return date !== selectedDate && l.systemDesign?.topic?.toLowerCase() === oldTopic.toLowerCase();
+        });
+        if (!isLoggedElsewhere) {
+          state.completedSystemDesign = state.completedSystemDesign.filter(id => id !== matchedOld.id);
+        }
+      }
+    }
+
+    log.systemDesign.topic = newTopic;
     log.systemDesign.minutes = parseInt(document.getElementById('checkin-sd-mins').value) || 0;
     log.systemDesign.notes = document.getElementById('checkin-sd-notes').value;
+
+    // 2. If new topic matches a predefined one, auto-check it on the roadmap
+    if (newTopic) {
+      const matchedNew = allSdTopics.find(t => t.name.toLowerCase() === newTopic.toLowerCase());
+      if (matchedNew) {
+        log.systemDesign.topic = matchedNew.name; // Normalize capitalization
+        if (!state.completedSystemDesign.includes(matchedNew.id)) {
+          state.completedSystemDesign.push(matchedNew.id);
+        }
+      }
+    }
 
     log.jsReact.topic = document.getElementById('checkin-js-topic').value;
     log.jsReact.minutes = parseInt(document.getElementById('checkin-js-mins').value) || 0;
