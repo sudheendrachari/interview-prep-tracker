@@ -102,6 +102,54 @@
     .quick-stat .value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
     .quick-stat .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.125rem; }
 
+    /* Target Status Badge & Footers */
+    .quick-stat .stat-target {
+      font-size: 0.65rem;
+      font-weight: 600;
+      border-radius: 4px;
+      padding: 1px 6px;
+      display: inline-block;
+      margin-top: 0.25rem;
+      letter-spacing: 0.02em;
+    }
+    .quick-stat .stat-target.lagging {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+    }
+    .quick-stat .stat-target.ahead {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+    }
+    .quick-stat .stat-target.ontrack {
+      background: rgba(59, 130, 246, 0.12);
+      color: #60a5fa;
+    }
+
+    .track-target-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .track-target-status .target-label {
+      color: var(--text-muted);
+    }
+    .track-target-status .target-value {
+      font-weight: 600;
+    }
+    .track-target-status .target-value.lagging {
+      color: #f87171;
+    }
+    .track-target-status .target-value.ahead {
+      color: #34d399;
+    }
+    .track-target-status .target-value.ontrack {
+      color: #60a5fa;
+    }
+
     /* ===== STREAK BAR ===== */
     .streak-bar {
       display: flex; align-items: center; justify-content: center; gap: 3rem;
@@ -610,29 +658,64 @@
   <!-- Sync settings modal -->
   <div class="modal-overlay" id="sync-modal">
     <div class="modal">
-      <h3>☁️ GitHub Gist Sync</h3>
-      <div id="sync-connected-banner" style="display:none" class="sync-connected-info">
-        ✅ Connected — Gist ID: <code id="sync-gist-id-display" style="margin-left:0.25rem;font-size:0.75rem"></code>
-      </div>
-      <div class="form-group">
-        <label>GitHub Personal Access Token</label>
-        <div class="token-input-wrap">
-          <input type="password" id="sync-token-input" placeholder="ghp_xxxxxxxxxxxx">
-          <button class="token-toggle" id="token-toggle-btn" type="button">👁️</button>
+      <h3>⚙️ Dashboard Settings</h3>
+      
+      <!-- Study Targets Section -->
+      <div style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:1rem;margin-bottom:1rem">
+        <h4 style="font-size:0.85rem;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.35rem">
+          <span>🎯</span> Study Targets
+        </h4>
+        <div class="form-group">
+          <label>Daily DSA Problem Target</label>
+          <input type="number" id="settings-dsa-target" min="1" max="50">
         </div>
-        <div class="form-hint">
-          Create one at <a href="https://github.com/settings/tokens?type=beta" target="_blank">GitHub Settings → Fine-grained tokens</a> with <strong>Gists</strong> permission only.
+        <div class="form-group" style="display:flex;gap:1.5rem;margin-bottom:0.5rem">
+          <div style="flex:1">
+            <label>Daily SD Target (mins)</label>
+            <input type="number" id="settings-sd-target" min="0" max="480">
+          </div>
+          <div style="flex:1">
+            <label>Daily JS Target (mins)</label>
+            <input type="number" id="settings-js-target" min="0" max="480">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.75rem;margin-bottom:0">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;text-transform:none;letter-spacing:normal">
+            <input type="checkbox" id="settings-weekends-off" style="width:auto;margin:0">
+            <span>Weekends Off (Do not count weekends in target progress)</span>
+          </label>
         </div>
       </div>
-      <div class="form-group">
-        <label>Gist ID (leave blank to create new)</label>
-        <input type="text" id="sync-gist-id-input" placeholder="Auto-created on first sync">
-        <div class="form-hint">If you already have a Gist from another device, paste its ID here.</div>
+
+      <!-- GitHub Gist Sync Section -->
+      <div>
+        <h4 style="font-size:0.85rem;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.35rem">
+          <span>☁️</span> GitHub Gist Sync
+        </h4>
+        <div id="sync-connected-banner" style="display:none" class="sync-connected-info">
+          ✅ Connected — Gist ID: <code id="sync-gist-id-display" style="margin-left:0.25rem;font-size:0.75rem"></code>
+        </div>
+        <div class="form-group">
+          <label>GitHub Personal Access Token</label>
+          <div class="token-input-wrap">
+            <input type="password" id="sync-token-input" placeholder="ghp_xxxxxxxxxxxx">
+            <button class="token-toggle" id="token-toggle-btn" type="button">👁️</button>
+          </div>
+          <div class="form-hint">
+            Create one at <a href="https://github.com/settings/tokens?type=beta" target="_blank">GitHub Settings → Fine-grained tokens</a> with <strong>Gists</strong> permission only.
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Gist ID (leave blank to create new)</label>
+          <input type="text" id="sync-gist-id-input" placeholder="Auto-created on first sync">
+          <div class="form-hint">If you already have a Gist from another device, paste its ID here.</div>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-danger btn-sm" id="sync-disconnect-btn">Disconnect</button>
+
+      <div class="modal-actions" style="margin-top:1.5rem">
+        <button class="btn btn-danger btn-sm" id="sync-disconnect-btn">Disconnect Gist</button>
         <button class="btn btn-secondary" id="sync-modal-cancel">Cancel</button>
-        <button class="btn btn-primary" id="sync-modal-save">Save & Connect</button>
+        <button class="btn btn-primary" id="sync-modal-save">Save Settings</button>
       </div>
     </div>
   </div>
@@ -967,6 +1050,7 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         state = { ...getDefaultState(), ...parsed };
+        state.settings = { ...getDefaultState().settings, ...state.settings };
       }
     } catch (e) {
       console.error('Failed to load state:', e);
@@ -1051,6 +1135,82 @@
     if (log.systemDesign && log.systemDesign.minutes > 0) count++;
     if (log.jsReact && log.jsReact.minutes > 0) count++;
     return count;
+  }
+
+  function calculateTargetStatus() {
+    const today = todayStr();
+    
+    // 1. Calculate elapsed target days (inclusive of today)
+    let targetDays = 0;
+    let curr = state.startDate;
+    while (daysBetween(curr, today) >= 0) {
+      if (!(isWeekend(curr) && state.settings.weekendsOff)) {
+        targetDays++;
+      }
+      curr = addDays(curr, 1);
+    }
+
+    // 2. DSA Target
+    const dsaDaily = state.settings.dailyProblemTarget || 4;
+    const dsaTargetVal = targetDays * dsaDaily;
+    const dsaSolved = state.completedProblems.length;
+    const dsaDiff = dsaSolved - dsaTargetVal;
+
+    // 3. System Design Target
+    const sdDailyMins = state.settings.dailySystemDesignMinutes || 60;
+    const sdTargetMins = targetDays * sdDailyMins;
+    const sdTargetHours = Math.round(sdTargetMins / 60 * 10) / 10;
+    const sdMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
+      s + (l.systemDesign ? (l.systemDesign.minutes || 0) : 0), 0);
+    const sdHours = Math.round(sdMinutes / 60 * 10) / 10;
+    const sdDiffHours = Math.round((sdHours - sdTargetHours) * 10) / 10;
+
+    // 4. JS/React Target
+    const jsDailyMins = state.settings.dailyJsMinutes || 60;
+    const jsTargetMins = targetDays * jsDailyMins;
+    const jsTargetHours = Math.round(jsTargetMins / 60 * 10) / 10;
+    const jsMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
+      s + (l.jsReact ? (l.jsReact.minutes || 0) : 0), 0);
+    const jsHours = Math.round(jsMinutes / 60 * 10) / 10;
+    const jsDiffHours = Math.round((jsHours - jsTargetHours) * 10) / 10;
+
+    return {
+      targetDays,
+      dsa: { target: dsaTargetVal, actual: dsaSolved, diff: dsaDiff },
+      systemDesign: { target: sdTargetHours, actual: sdHours, diff: sdDiffHours },
+      jsReact: { target: jsTargetHours, actual: jsHours, diff: jsDiffHours }
+    };
+  }
+
+  function getTargetBadgeHTML(diff, unit = 'problems') {
+    if (diff < 0) {
+      const val = Math.abs(diff);
+      return `<span class="stat-target lagging">${val} ${unit} behind</span>`;
+    } else if (diff > 0) {
+      return `<span class="stat-target ahead">+${diff} ${unit} ahead</span>`;
+    } else {
+      return `<span class="stat-target ontrack">On track</span>`;
+    }
+  }
+
+  function getTargetFooterHTML(target, actual, diff, unit = '') {
+    let diffClass = 'ontrack';
+    let diffText = 'On track';
+    
+    if (diff < 0) {
+      diffClass = 'lagging';
+      diffText = `${Math.abs(diff)}${unit} behind`;
+    } else if (diff > 0) {
+      diffClass = 'ahead';
+      diffText = `+${diff}${unit} ahead`;
+    }
+    
+    return `
+      <div class="track-target-status">
+        <span class="target-label">Target: ${target}${unit}</span>
+        <span class="target-value ${diffClass}">${diffText}</span>
+      </div>
+    `;
   }
 
   // ============================================================
@@ -1150,9 +1310,15 @@
     }, 0);
     const daysActive = Object.keys(state.dailyLogs).filter(d => getDayActivity(d) > 0).length;
 
+    const targetStatus = calculateTargetStatus();
+
     document.getElementById('quick-stats').innerHTML = `
       <div class="quick-stat"><div class="value">${daysActive}</div><div class="label">Days Active</div></div>
-      <div class="quick-stat"><div class="value">${totalSolved}</div><div class="label">Problems Solved</div></div>
+      <div class="quick-stat">
+        <div class="value">${totalSolved}</div>
+        <div class="label">Problems Solved</div>
+        ${getTargetBadgeHTML(targetStatus.dsa.diff, 'problems')}
+      </div>
       <div class="quick-stat"><div class="value">${totalSDDone}</div><div class="label">SD Topics</div></div>
       <div class="quick-stat"><div class="value">${Math.round(totalHours/60*10)/10}</div><div class="label">Hours Logged</div></div>
     `;
@@ -1203,35 +1369,37 @@
   // RENDER: TRACK PROGRESS CARDS
   // ============================================================
   function renderTrackCards() {
+    const targetStatus = calculateTargetStatus();
+    
     const total75 = getTotalProblems('blind75');
     const total150 = getTotalProblems('neetcode150');
     const blind75Solved = CATEGORIES.flatMap(c => c.problems.filter(p => p.blind75))
       .filter(p => state.completedProblems.includes(p.id)).length;
     const n150Solved = state.completedProblems.length;
-
+ 
     const activeTotal = state.activeList === 'blind75' ? total75 : total150;
     const activeSolved = state.activeList === 'blind75' ? blind75Solved : n150Solved;
     const pct = activeTotal > 0 ? Math.round((activeSolved / activeTotal) * 100) : 0;
     const circumference = 2 * Math.PI * 24;
     const offset = circumference - (pct / 100) * circumference;
-
+ 
     // System design
     const sdTotal = SYSTEM_DESIGN_TOPICS.reduce((s, g) => s + g.topics.length, 0);
     const sdDone = state.completedSystemDesign.length;
     const sdPct = sdTotal > 0 ? Math.round((sdDone / sdTotal) * 100) : 0;
     const sdOffset = circumference - (sdPct / 100) * circumference;
-
+ 
     const sdMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
       s + (l.systemDesign ? (l.systemDesign.minutes || 0) : 0), 0);
     const sdHours = Math.round(sdMinutes / 60 * 10) / 10;
-
+ 
     // JS/React hours
     const jsMinutes = Object.values(state.dailyLogs).reduce((s, l) =>
       s + (l.jsReact ? (l.jsReact.minutes || 0) : 0), 0);
     const jsHours = Math.round(jsMinutes / 60 * 10) / 10;
     const jsSessions = Object.values(state.dailyLogs).filter(l =>
       l.jsReact && l.jsReact.minutes > 0).length;
-
+ 
     document.getElementById('track-grid').innerHTML = `
       <div class="card track-card neetcode">
         <div class="track-header">
@@ -1254,8 +1422,9 @@
         </div>
         <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--green-dark),var(--green-light))"></div></div>
         <div class="category-mini"><span>${activeSolved} solved</span><span>${activeTotal - activeSolved} remaining</span></div>
+        ${getTargetFooterHTML(targetStatus.dsa.target, targetStatus.dsa.actual, targetStatus.dsa.diff, ' solved')}
       </div>
-
+ 
       <div class="card track-card sysdesign">
         <div class="track-header">
           <div style="display:flex;align-items:center;gap:0.5rem">
@@ -1277,8 +1446,9 @@
         </div>
         <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${sdPct}%;background:linear-gradient(90deg,var(--blue-dark),var(--blue-light))"></div></div>
         <div class="category-mini"><span>${sdDone} covered (${sdHours}h logged)</span><span>${sdTotal - sdDone} remaining</span></div>
+        ${getTargetFooterHTML(targetStatus.systemDesign.target, targetStatus.systemDesign.actual, targetStatus.systemDesign.diff, 'h')}
       </div>
-
+ 
       <div class="card track-card jsreact">
         <div class="track-header">
           <div style="display:flex;align-items:center;gap:0.5rem">
@@ -1301,6 +1471,7 @@
         </div>
         <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${Math.min(100, jsHours / 50 * 100)}%;background:linear-gradient(90deg,var(--amber-dark),var(--amber-light))"></div></div>
         <div class="category-mini"><span>${jsSessions} sessions</span><span>${jsMinutes} total mins</span></div>
+        ${getTargetFooterHTML(targetStatus.jsReact.target, targetStatus.jsReact.actual, targetStatus.jsReact.diff, 'h')}
       </div>
     `;
   }
@@ -1963,6 +2134,11 @@
     // Settings button opens modal
     document.getElementById('sync-settings-btn').addEventListener('click', () => {
       const modal = document.getElementById('sync-modal');
+      document.getElementById('settings-dsa-target').value = state.settings.dailyProblemTarget || 4;
+      document.getElementById('settings-sd-target').value = state.settings.dailySystemDesignMinutes || 60;
+      document.getElementById('settings-js-target').value = state.settings.dailyJsMinutes || 60;
+      document.getElementById('settings-weekends-off').checked = !!state.settings.weekendsOff;
+
       document.getElementById('sync-token-input').value = getSyncToken();
       document.getElementById('sync-gist-id-input').value = getSyncGistId();
       // Show connected banner if applicable
@@ -1990,18 +2166,35 @@
 
     // Modal save
     document.getElementById('sync-modal-save').addEventListener('click', () => {
+      // 1. Save Study Targets
+      state.settings.dailyProblemTarget = parseInt(document.getElementById('settings-dsa-target').value) || 4;
+      state.settings.dailySystemDesignMinutes = parseInt(document.getElementById('settings-sd-target').value) || 0;
+      state.settings.dailyJsMinutes = parseInt(document.getElementById('settings-js-target').value) || 0;
+      state.settings.weekendsOff = document.getElementById('settings-weekends-off').checked;
+      
+      saveState();
+
+      // 2. Save Sync Config
       const token = document.getElementById('sync-token-input').value.trim();
       const gistId = document.getElementById('sync-gist-id-input').value.trim();
-      if (!token) {
-        alert('Please enter a GitHub Personal Access Token.');
-        return;
+      
+      let shouldSync = false;
+      if (token) {
+        setSyncToken(token);
+        if (gistId) setSyncGistId(gistId);
+        shouldSync = true;
+      } else if (getSyncToken()) {
+        // Explicitly disconnected if they cleared it
+        clearSyncConfig();
       }
-      setSyncToken(token);
-      if (gistId) setSyncGistId(gistId);
+
       document.getElementById('sync-modal').classList.remove('show');
+      renderAll();
       renderSyncStatus();
-      // Auto-sync after connecting
-      doSync();
+      
+      if (shouldSync) {
+        doSync();
+      }
     });
 
     // Disconnect
@@ -2009,6 +2202,7 @@
       if (confirm('Disconnect from GitHub Gist? Your local data will be kept.')) {
         clearSyncConfig();
         document.getElementById('sync-modal').classList.remove('show');
+        renderAll();
         renderSyncStatus();
       }
     });
