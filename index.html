@@ -348,6 +348,54 @@
       background: rgba(16,185,129,0.15); color: var(--green-main); font-weight: 600;
     }
 
+    /* ===== STAR BUTTONS ===== */
+    .btn-star {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.15rem;
+      padding: 0 0.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .btn-star:hover {
+      transform: scale(1.2);
+      color: var(--amber-main);
+    }
+    .btn-star.starred {
+      color: var(--amber-main);
+      text-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-filter-starred {
+      padding: 0.5rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease-in-out;
+      font-weight: 500;
+      user-select: none;
+    }
+    .btn-filter-starred:hover {
+      border-color: var(--border-card-hover);
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+    .btn-filter-starred.active {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: var(--amber-main);
+      color: var(--amber-main);
+    }
+
     .category-accordion { margin-bottom: 0.75rem; }
     .category-header {
       display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem;
@@ -657,7 +705,12 @@
 
       <!-- DSA Tab -->
       <div class="tab-content active" id="dsa-tab">
-        <div class="list-toggle" id="list-toggle"></div>
+        <div class="roadmap-header-controls" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+          <div class="list-toggle" id="list-toggle" style="margin-bottom:0;"></div>
+          <button id="filter-starred-btn" class="btn-filter-starred" title="Toggle Starred Problems Filter">
+            <span class="star-icon">☆</span> Show Starred Only (0)
+          </button>
+        </div>
         <div id="roadmap-categories"></div>
       </div>
 
@@ -1091,7 +1144,9 @@
       completedProblems: [],
       completedSystemDesign: [],
       activeList: 'blind75',
-      milestonesShown: []
+      milestonesShown: [],
+      starredProblems: [],
+      showStarredOnly: false
     };
   }
 
@@ -1748,59 +1803,125 @@
         labelSuffix = `<span style="font-size:0.75rem;color:var(--text-muted);margin-left:0.5rem">${solvedDate ? `(Solved on ${solvedDate})` : '(Solved on Roadmap)'}</span>`;
       }
 
+      const isStarred = (state.starredProblems || []).includes(p.id);
+
       return `
         <div class="problem-item" style="padding:0.35rem 0.5rem; ${isSolvedElsewhere ? 'opacity:0.7;cursor:not-allowed;' : ''}">
           <input type="checkbox" id="checkin-p-${p.id}" data-problem-id="${p.id}" ${checkedAttr} ${disabledAttr}>
+          <button class="btn-star ${isStarred ? 'starred' : ''}" data-problem-id="${p.id}" title="${isStarred ? 'Unstar problem' : 'Star problem'}" style="font-size:0.95rem;">
+            ${isStarred ? '★' : '☆'}
+          </button>
           <span class="problem-name ${solvedClass}" style="font-size:0.8rem">${p.name}${labelSuffix}</span>
           <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
         </div>
       `;
     }).join('');
+
+    // Star toggle in check-in problems list
+    container.querySelectorAll('.btn-star').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pid = btn.dataset.problemId;
+        if (!state.starredProblems) {
+          state.starredProblems = [];
+        }
+        const index = state.starredProblems.indexOf(pid);
+        if (index === -1) {
+          state.starredProblems.push(pid);
+        } else {
+          state.starredProblems.splice(index, 1);
+        }
+        saveState();
+        renderCheckinProblems(catId, log);
+        renderRoadmap();
+      });
+    });
   }
 
   // ============================================================
   // RENDER: PROBLEM ROADMAP
   // ============================================================
   function renderRoadmap() {
+    const cats = getProblemsForList(state.activeList);
+    const activeListProblemIds = new Set(cats.flatMap(cat => cat.problems.map(p => p.id)));
+    const activeStarredCount = (state.starredProblems || []).filter(id => activeListProblemIds.has(id)).length;
+
+    // Filter toggle button UI
+    const filterBtn = document.getElementById('filter-starred-btn');
+    if (filterBtn) {
+      const newFilterBtn = filterBtn.cloneNode(true);
+      filterBtn.parentNode.replaceChild(newFilterBtn, filterBtn);
+      newFilterBtn.classList.toggle('active', !!state.showStarredOnly);
+      newFilterBtn.innerHTML = `<span class="star-icon">${state.showStarredOnly ? '★' : '☆'}</span> Show Starred Only (${activeStarredCount})`;
+      newFilterBtn.addEventListener('click', () => {
+        state.showStarredOnly = !state.showStarredOnly;
+        saveState();
+        renderRoadmap();
+      });
+    }
+
     // List toggle
     document.getElementById('list-toggle').innerHTML = `
       <button class="${state.activeList === 'blind75' ? 'active' : ''}" data-list="blind75">Blind 75</button>
       <button class="${state.activeList === 'neetcode150' ? 'active' : ''}" data-list="neetcode150">Neetcode 150</button>
     `;
 
-    const cats = getProblemsForList(state.activeList);
     const container = document.getElementById('roadmap-categories');
-    container.innerHTML = cats.map(cat => {
-      const completed = getCompletedInCategory(cat);
-      const total = cat.problems.length;
-      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-      return `
-        <div class="category-accordion">
-          <button class="category-header" data-cat="${cat.id}">
-            <span class="chevron">▶</span>
-            <span class="cat-name">${cat.name}</span>
-            <span class="cat-progress">${completed}/${total}</span>
-            <div class="cat-bar"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
-          </button>
-          <div class="category-problems" id="cat-${cat.id}">
-            <div class="category-problems-inner">
-              ${cat.problems.map(p => {
-                const isSolved = state.completedProblems.includes(p.id);
-                return `
-                  <div class="problem-item">
-                    <input type="checkbox" data-problem-id="${p.id}" ${isSolved ? 'checked' : ''}>
-                    <span class="problem-name ${isSolved ? 'solved' : ''}">${p.name}</span>
-                    <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
-                    <a class="problem-link" href="https://neetcode.io/problems/${p.id}" target="_blank" rel="noopener">↗ neetcode</a>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
+    
+    if (state.showStarredOnly && activeStarredCount === 0) {
+      container.innerHTML = `
+        <div class="empty-starred-state" style="text-align:center; padding:3rem 1.5rem; color:var(--text-muted); background:var(--bg-card); border:1px dashed var(--border-card); border-radius:var(--radius-lg); margin-top:0.5rem; width:100%;">
+          <div style="font-size:2rem; margin-bottom:0.75rem;">⭐</div>
+          <p style="font-weight:500; color:var(--text-secondary);">No starred problems in this list</p>
+          <p style="font-size:0.85rem; margin-top:0.25rem;">Star problems in the roadmap to flag them for review later.</p>
         </div>
       `;
-    }).join('');
+    } else {
+      container.innerHTML = cats.map(cat => {
+        const completed = getCompletedInCategory(cat);
+        const total = cat.problems.length;
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        let displayProblems = cat.problems;
+        if (state.showStarredOnly) {
+          displayProblems = cat.problems.filter(p => (state.starredProblems || []).includes(p.id));
+        }
+
+        if (state.showStarredOnly && displayProblems.length === 0) {
+          return '';
+        }
+
+        return `
+          <div class="category-accordion">
+            <button class="category-header" data-cat="${cat.id}">
+              <span class="chevron ${state.showStarredOnly ? 'open' : ''}">▶</span>
+              <span class="cat-name">${cat.name}</span>
+              <span class="cat-progress">${completed}/${total}</span>
+              <div class="cat-bar"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+            </button>
+            <div class="category-problems ${state.showStarredOnly ? 'open' : ''}" id="cat-${cat.id}">
+              <div class="category-problems-inner">
+                ${displayProblems.map(p => {
+                  const isSolved = state.completedProblems.includes(p.id);
+                  const isStarred = (state.starredProblems || []).includes(p.id);
+                  return `
+                    <div class="problem-item">
+                      <input type="checkbox" data-problem-id="${p.id}" ${isSolved ? 'checked' : ''}>
+                      <button class="btn-star ${isStarred ? 'starred' : ''}" data-problem-id="${p.id}" title="${isStarred ? 'Unstar problem' : 'Star problem'}">
+                        ${isStarred ? '★' : '☆'}
+                      </button>
+                      <span class="problem-name ${isSolved ? 'solved' : ''}">${p.name}</span>
+                      <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
+                      <a class="problem-link" href="https://neetcode.io/problems/${p.id}" target="_blank" rel="noopener">↗ neetcode</a>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     // Accordion toggle
     container.querySelectorAll('.category-header').forEach(btn => {
@@ -1825,6 +1946,25 @@
         saveState();
         renderAll();
         checkMilestones();
+      });
+    });
+
+    // Star toggle in roadmap
+    container.querySelectorAll('.btn-star').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pid = btn.dataset.problemId;
+        if (!state.starredProblems) {
+          state.starredProblems = [];
+        }
+        const index = state.starredProblems.indexOf(pid);
+        if (index === -1) {
+          state.starredProblems.push(pid);
+        } else {
+          state.starredProblems.splice(index, 1);
+        }
+        saveState();
+        renderRoadmap();
       });
     });
 
