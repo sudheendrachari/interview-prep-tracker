@@ -230,17 +230,22 @@
     .heatmap-cell.level-2 { background: var(--heatmap-2); }
     .heatmap-cell.level-3 { background: var(--heatmap-3); }
     .heatmap-cell.weekend { border: 1px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.015); }
-    .heatmap-cell.weekend.level-1, .heatmap-cell.weekend.level-2, .heatmap-cell.weekend.level-3 {
-      box-shadow: 0 0 6px rgba(250,204,21,0.4); border-color: rgba(250,204,21,0.3);
-    }
+    .heatmap-cell.weekend.level-1 { background: var(--amber-dark); border-color: var(--amber-light); opacity: 0.7; }
+    .heatmap-cell.weekend.level-2 { background: var(--amber-main); border-color: var(--amber-light); }
+    .heatmap-cell.weekend.level-3 { background: var(--amber-light); border-color: #fff; box-shadow: 0 0 6px rgba(245,158,11,0.6); }
     .heatmap-cell.vacation {
-      background: rgba(59,130,246,0.15);
-      border: 1px dashed rgba(59,130,246,0.4);
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.02),
+        rgba(255, 255, 255, 0.02) 2px,
+        rgba(255, 255, 255, 0.12) 2px,
+        rgba(255, 255, 255, 0.12) 4px
+      );
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .heatmap-cell.vacation.level-1, .heatmap-cell.vacation.level-2, .heatmap-cell.vacation.level-3 {
-      border: 1px solid rgba(59,130,246,0.6);
-      box-shadow: 0 0 6px rgba(59,130,246,0.4);
-    }
+    .heatmap-cell.vacation.level-1 { background: var(--heatmap-1); }
+    .heatmap-cell.vacation.level-2 { background: var(--heatmap-2); }
+    .heatmap-cell.vacation.level-3 { background: var(--heatmap-3); }
     .heatmap-cell.future { opacity: 0.3; }
     .heatmap-cell.today { outline: 2px solid var(--green-main); outline-offset: 1px; }
     .heatmap-tooltip {
@@ -683,13 +688,13 @@
           <div class="legend-cell" style="background:var(--heatmap-3)"></div>
           <span>More</span>
           <span style="margin-left:0.75rem; display:flex; align-items:center; gap:0.25rem;">
-            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; border: 1px dashed rgba(255,255,255,0.4); background: rgba(255,255,255,0.015);"></span> Weekend
+            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; border: 1px dashed rgba(255,255,255,0.2); background: rgba(255,255,255,0.015);"></span> Weekend
           </span>
           <span style="margin-left:0.5rem; display:flex; align-items:center; gap:0.25rem;">
-            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; border: 1px dashed rgba(250,204,21,0.5); box-shadow: 0 0 4px rgba(250,204,21,0.4);"></span> Weekend Activity
+            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; background: var(--amber-main); border: 1px solid var(--amber-light);"></span> Weekend Activity
           </span>
           <span style="margin-left:0.5rem; display:flex; align-items:center; gap:0.25rem;">
-            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); box-shadow: inset 0 0 4px rgba(59,130,246,0.2);"></span> Vacation
+            <span style="display:inline-block; width:12px; height:12px; border-radius:2px; background: repeating-linear-gradient(45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.12) 2px, rgba(255,255,255,0.12) 4px); border: 1px solid rgba(255,255,255,0.12);"></span> Excluded Day
           </span>
         </div>
       </div>
@@ -1721,7 +1726,7 @@
       let text = `<strong>${formatDateLabel(date)}</strong>`;
       let tags = [];
       if (isWknd) tags.push('Weekend');
-      if (isVacation) tags.push('Vacation');
+      if (isVacation) tags.push('Excluded Day');
       if (tags.length > 0) text += ` (${tags.join(', ')})`;
       text += '<br>';
 
