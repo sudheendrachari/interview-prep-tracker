@@ -1799,11 +1799,8 @@
             <option value="">-- Select Category --</option>
             ${getProblemsForList(checkinList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
           </select>
+          <input type="text" id="checkin-problem-search" placeholder="🔍 Search problems..." style="margin-bottom:0.5rem; width: 100%; padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-card); color: var(--text-primary); border-radius: var(--radius-xs); font-family: 'Inter', sans-serif; font-size: 0.85rem;" autocomplete="off">
           <div id="checkin-problem-list" style="max-height:200px;overflow-y:auto;margin-top:0.5rem;"></div>
-        </div>
-        <div class="form-group">
-          <label>Notes</label>
-          <textarea id="checkin-nc-notes" placeholder="What patterns did you learn?">${log.neetcode.notes || ''}</textarea>
         </div>
       </div>
 
@@ -1823,10 +1820,6 @@
             <span>minutes</span>
           </div>
         </div>
-        <div class="form-group">
-          <label>Notes</label>
-          <textarea id="checkin-sd-notes" placeholder="Key takeaways...">${log.systemDesign.notes || ''}</textarea>
-        </div>
       </div>
 
       <div class="card checkin-card jsreact">
@@ -1842,17 +1835,19 @@
             <span>minutes</span>
           </div>
         </div>
-        <div class="form-group">
-          <label>Notes</label>
-          <textarea id="checkin-js-notes" placeholder="What did you learn?">${log.jsReact.notes || ''}</textarea>
-        </div>
       </div>
     `;
 
-    // Problem category change
-    document.getElementById('checkin-problem-cat').addEventListener('change', (e) => {
-      renderCheckinProblems(e.target.value, log);
-    });
+    // Problem category change & search input change
+    const catSelect = document.getElementById('checkin-problem-cat');
+    const searchInput = document.getElementById('checkin-problem-search');
+    
+    const triggerFilter = () => {
+      renderCheckinProblems(catSelect.value, searchInput.value, log);
+    };
+
+    catSelect.addEventListener('change', triggerFilter);
+    searchInput.addEventListener('input', triggerFilter);
 
     // List toggle change inside checkin
     const toggleContainer = document.getElementById('checkin-list-toggle');
@@ -1862,12 +1857,19 @@
           checkinList = btn.dataset.list;
           
           // Redraw category options
-          const catSelect = document.getElementById('checkin-problem-cat');
+          const prevSelectedCat = catSelect.value;
           catSelect.innerHTML = `<option value="">-- Select Category --</option>` + 
             getProblemsForList(checkinList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
           
-          // Clear problem list container
-          document.getElementById('checkin-problem-list').innerHTML = '';
+          if (prevSelectedCat) {
+            catSelect.value = prevSelectedCat;
+          }
+          
+          // Clear search text
+          searchInput.value = '';
+          
+          // Re-trigger filtering
+          triggerFilter();
           
           // Update active styles on the buttons
           toggleContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -1877,13 +1879,35 @@
     }
   }
 
-  function renderCheckinProblems(catId, log) {
+  function renderCheckinProblems(catId, searchQuery, log) {
     const container = document.getElementById('checkin-problem-list');
-    if (!catId) { container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">Select a category to see problems</span>'; return; }
-
+    
     const cats = getProblemsForList(checkinList);
-    const cat = cats.find(c => c.id === catId);
-    if (!cat) return;
+    let problemsToDisplay = [];
+    
+    if (catId) {
+      const cat = cats.find(c => c.id === catId);
+      if (cat) problemsToDisplay = cat.problems;
+    } else {
+      // If no category is selected, but they typed something in search, we search ALL problems in the list
+      if (searchQuery && searchQuery.trim() !== '') {
+        problemsToDisplay = cats.flatMap(c => c.problems);
+      }
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      problemsToDisplay = problemsToDisplay.filter(p => p.name.toLowerCase().includes(q));
+    }
+
+    if (problemsToDisplay.length === 0) {
+      if (!catId && (!searchQuery || searchQuery.trim() === '')) {
+        container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">Select a category or type to search problems</span>';
+      } else {
+        container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">No matching problems found</span>';
+      }
+      return;
+    }
 
     const solvedToday = log.neetcode.problemsSolved || [];
 
@@ -1899,7 +1923,7 @@
       return null;
     };
 
-    container.innerHTML = cat.problems.map(p => {
+    container.innerHTML = problemsToDisplay.map(p => {
       const isSolvedToday = solvedToday.includes(p.id);
       const isSolvedElsewhere = state.completedProblems.includes(p.id) && !isSolvedToday;
 
@@ -1948,7 +1972,7 @@
           state.starredProblems.splice(index, 1);
         }
         saveState();
-        renderCheckinProblems(catId, log);
+        renderCheckinProblems(catId, searchQuery, log);
         renderRoadmap();
       });
     });
@@ -2221,7 +2245,7 @@
 
     log.neetcode.problemsSolved = solvedToday;
     log.neetcode.minutes = 0;
-    log.neetcode.notes = document.getElementById('checkin-nc-notes').value;
+    log.neetcode.notes = '';
 
     const oldTopic = log.systemDesign.topic || '';
     const newTopic = document.getElementById('checkin-sd-topic').value.trim();
@@ -2245,7 +2269,7 @@
 
     log.systemDesign.topic = newTopic;
     log.systemDesign.minutes = parseInt(document.getElementById('checkin-sd-mins').value) || 0;
-    log.systemDesign.notes = document.getElementById('checkin-sd-notes').value;
+    log.systemDesign.notes = '';
 
     // 2. If new topic matches a predefined one, auto-check it on the roadmap
     if (newTopic) {
@@ -2260,7 +2284,7 @@
 
     log.jsReact.topic = document.getElementById('checkin-js-topic').value;
     log.jsReact.minutes = parseInt(document.getElementById('checkin-js-mins').value) || 0;
-    log.jsReact.notes = document.getElementById('checkin-js-notes').value;
+    log.jsReact.notes = '';
 
     state.dailyLogs[selectedDate] = log;
     saveState();
