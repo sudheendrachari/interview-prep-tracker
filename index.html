@@ -360,6 +360,17 @@
     .list-toggle button.active {
       background: rgba(16,185,129,0.15); color: var(--green-main); font-weight: 600;
     }
+    .list-toggle-sm {
+      display: inline-flex; background: rgba(255,255,255,0.04); border-radius: var(--radius-xs);
+      border: 1px solid var(--border-card); overflow: hidden; margin-bottom: 0.5rem;
+    }
+    .list-toggle-sm button {
+      padding: 0.35rem 0.75rem; background: none; border: none; color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+    }
+    .list-toggle-sm button.active {
+      background: rgba(16,185,129,0.15); color: var(--green-main); font-weight: 600;
+    }
 
     /* ===== STAR BUTTONS ===== */
     .btn-star {
@@ -1762,6 +1773,7 @@
   // RENDER: DAILY CHECK-IN
   // ============================================================
   let selectedDate = todayStr();
+  let checkinList = 'blind75';
 
   function renderCheckin() {
     const dateInput = document.getElementById('checkin-date');
@@ -1775,20 +1787,19 @@
     document.getElementById('checkin-grid').innerHTML = `
       <div class="card checkin-card neetcode">
         <div class="checkin-title"><span class="dot"></span> Neetcode DSA</div>
-        <div class="form-group">
-          <label>Problems Solved Today</label>
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label style="margin-bottom:0.35rem;">Problems Solved Today</label>
+          <div style="margin-bottom:0.5rem;">
+            <div class="list-toggle-sm" id="checkin-list-toggle" style="margin-bottom:0;">
+              <button class="${checkinList === 'blind75' ? 'active' : ''}" data-list="blind75" type="button">Blind 75</button>
+              <button class="${checkinList === 'neetcode150' ? 'active' : ''}" data-list="neetcode150" type="button">Neetcode 150</button>
+            </div>
+          </div>
           <select id="checkin-problem-cat" style="margin-bottom:0.5rem">
             <option value="">-- Select Category --</option>
-            ${getProblemsForList(state.activeList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
+            ${getProblemsForList(checkinList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
           </select>
           <div id="checkin-problem-list" style="max-height:200px;overflow-y:auto;margin-top:0.5rem;"></div>
-        </div>
-        <div class="form-group">
-          <label>Minutes Spent</label>
-          <div class="minute-input-group">
-            <input type="number" id="checkin-nc-mins" min="0" value="${log.neetcode.minutes || 0}">
-            <span>minutes</span>
-          </div>
         </div>
         <div class="form-group">
           <label>Notes</label>
@@ -1842,13 +1853,35 @@
     document.getElementById('checkin-problem-cat').addEventListener('change', (e) => {
       renderCheckinProblems(e.target.value, log);
     });
+
+    // List toggle change inside checkin
+    const toggleContainer = document.getElementById('checkin-list-toggle');
+    if (toggleContainer) {
+      toggleContainer.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          checkinList = btn.dataset.list;
+          
+          // Redraw category options
+          const catSelect = document.getElementById('checkin-problem-cat');
+          catSelect.innerHTML = `<option value="">-- Select Category --</option>` + 
+            getProblemsForList(checkinList).map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+          
+          // Clear problem list container
+          document.getElementById('checkin-problem-list').innerHTML = '';
+          
+          // Update active styles on the buttons
+          toggleContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    }
   }
 
   function renderCheckinProblems(catId, log) {
     const container = document.getElementById('checkin-problem-list');
     if (!catId) { container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">Select a category to see problems</span>'; return; }
 
-    const cats = getProblemsForList(state.activeList);
+    const cats = getProblemsForList(checkinList);
     const cat = cats.find(c => c.id === catId);
     if (!cat) return;
 
@@ -2021,9 +2054,29 @@
     container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.addEventListener('change', () => {
         const pid = cb.dataset.problemId;
-        if (cb.checked && !state.completedProblems.includes(pid)) {
-          state.completedProblems.push(pid);
-        } else if (!cb.checked) {
+        const today = todayStr();
+        if (!state.dailyLogs[today]) {
+          state.dailyLogs[today] = {
+            neetcode: { problemsSolved: [], minutes: 0, notes: '' },
+            systemDesign: { topic: '', minutes: 0, notes: '' },
+            jsReact: { topic: '', minutes: 0, notes: '' }
+          };
+        }
+        if (!state.dailyLogs[today].neetcode) {
+          state.dailyLogs[today].neetcode = { problemsSolved: [], minutes: 0, notes: '' };
+        }
+        if (!state.dailyLogs[today].neetcode.problemsSolved) {
+          state.dailyLogs[today].neetcode.problemsSolved = [];
+        }
+
+        if (cb.checked) {
+          if (!state.completedProblems.includes(pid)) {
+            state.completedProblems.push(pid);
+          }
+          if (!state.dailyLogs[today].neetcode.problemsSolved.includes(pid)) {
+            state.dailyLogs[today].neetcode.problemsSolved.push(pid);
+          }
+        } else {
           removeSolvedProblem(pid);
         }
         saveState();
@@ -2167,7 +2220,7 @@
     });
 
     log.neetcode.problemsSolved = solvedToday;
-    log.neetcode.minutes = parseInt(document.getElementById('checkin-nc-mins').value) || 0;
+    log.neetcode.minutes = 0;
     log.neetcode.notes = document.getElementById('checkin-nc-notes').value;
 
     const oldTopic = log.systemDesign.topic || '';
