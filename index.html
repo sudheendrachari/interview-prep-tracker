@@ -1974,6 +1974,7 @@
         saveState();
         renderCheckinProblems(catId, searchQuery, log);
         renderRoadmap();
+        triggerAutoSync();
       });
     });
   }
@@ -2106,6 +2107,7 @@
         saveState();
         renderAll();
         checkMilestones();
+        triggerAutoSync();
       });
     });
 
@@ -2125,6 +2127,7 @@
         }
         saveState();
         renderRoadmap();
+        triggerAutoSync();
       });
     });
 
@@ -2177,6 +2180,7 @@
         }
         saveState();
         renderTrackCards();
+        triggerAutoSync();
       });
     });
   }
@@ -2476,6 +2480,13 @@
     } finally {
       setSyncBtnLoading(false);
     }
+  let syncTimeout = null;
+  function triggerAutoSync() {
+    if (!getSyncToken()) return;
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+      doSync();
+    }, 1500);
   }
 
   function initSync() {
