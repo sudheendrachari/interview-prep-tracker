@@ -211,7 +211,7 @@ export function getTargetBadgeHTML(diff, unit = 'problems') {
   return '<span class="stat-target ontrack">On track</span>';
 }
 
-export function getTargetFooterHTML(target, actual, diff, unit = '') {
+export function getTargetFooterHTML(target, actual, diff, unit = '', labelPrefix = 'Target (Cumulative)') {
   let diffClass = 'ontrack';
   let diffText = 'On track';
 
@@ -225,7 +225,7 @@ export function getTargetFooterHTML(target, actual, diff, unit = '') {
 
   return `
     <div class="track-target-status">
-      <span class="target-label">Target: ${target}${unit}</span>
+      <span class="target-label">${labelPrefix}: ${target}${unit}</span>
       <span class="target-value ${diffClass}">${diffText}</span>
     </div>
   `;

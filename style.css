@@ -24,6 +24,9 @@
   --amber-main: #f59e0b;
   --amber-dark: #d97706;
   --amber-light: #fbbf24;
+  --cyan-main: #06b6d4;
+  --cyan-dark: #0891b2;
+  --cyan-light: #22d3ee;
   --streak-orange: #f97316;
   --danger: #ef4444;
   --heatmap-0: rgba(255,255,255,0.03);
@@ -185,6 +188,31 @@ body::before {
 .progress-ring .ring-fill { transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 .progress-info .progress-pct { font-size: 1.25rem; font-weight: 700; }
 .progress-info .progress-detail { font-size: 0.75rem; color: var(--text-muted); }
+
+.dsa-progress-split {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  flex-wrap: wrap;
+}
+.dsa-progress-split .progress-ring-container {
+  margin-bottom: 0;
+  flex: 1;
+  gap: 0.5rem;
+}
+.dsa-progress-split .progress-subtext {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+}
+.dsa-progress-split .progress-ring-container:first-child .progress-pct {
+  color: var(--green-main);
+}
+.dsa-progress-split .progress-ring-container:last-child .progress-pct {
+  color: var(--cyan-main);
+}
 
 /* Progress bar */
 .progress-bar-track {
@@ -795,4 +823,42 @@ body::before {
 @media (max-width: 500px) {
   .github-corner:hover .octo-arm { animation: none; }
   .github-corner .octo-arm { animation: octocat-wave 560ms ease-in-out; }
+}
+
+/* ===== DAILY GOALS (GAMIFICATION) ===== */
+.daily-goal-box {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+}
+.daily-goal-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+.daily-goal-pct {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.progress-bar-track.mini {
+  height: 5px;
+  margin: 0;
+}
+.progress-bar-fill.dsa-color {
+  background: var(--green-main);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+.progress-bar-fill.sd-color {
+  background: var(--blue-main);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+.progress-bar-fill.js-color {
+  background: var(--amber-main);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
 }

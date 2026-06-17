@@ -140,11 +140,11 @@ export function renderTrackCards() {
     .filter((p) => state.completedProblems.includes(p.id)).length;
   const n150Solved = state.completedProblems.length;
 
-  const activeTotal = state.activeList === 'blind75' ? total75 : total150;
-  const activeSolved = state.activeList === 'blind75' ? blind75Solved : n150Solved;
-  const pct = activeTotal > 0 ? Math.round((activeSolved / activeTotal) * 100) : 0;
+  const pct75 = total75 > 0 ? Math.round((blind75Solved / total75) * 100) : 0;
+  const pct150 = total150 > 0 ? Math.round((n150Solved / total150) * 100) : 0;
   const circumference = 2 * Math.PI * 24;
-  const offset = circumference - (pct / 100) * circumference;
+  const offset75 = circumference - (pct75 / 100) * circumference;
+  const offset150 = circumference - (pct150 / 100) * circumference;
 
   // System design
   const sdTotal = SYSTEM_DESIGN_TOPICS.reduce((s, g) => s + g.topics.length, 0);
@@ -162,6 +162,32 @@ export function renderTrackCards() {
     (l) => l.jsReact && l.jsReact.minutes > 0,
   ).length;
 
+  // Daily target data (for today)
+  const today = todayStr();
+  const todayLog = state.dailyLogs[today] || {
+    neetcode: { problemsSolved: [], minutes: 0, notes: '' },
+    systemDesign: { topic: '', minutes: 0, notes: '' },
+    jsReact: { topic: '', minutes: 0, notes: '' },
+  };
+
+  const dsaDaily = state.settings.dailyProblemTarget || 4;
+  const solvedTodayCount = todayLog.neetcode?.problemsSolved?.length || 0;
+  const dsaGoalAchieved = solvedTodayCount >= dsaDaily;
+  const dsaGoalText = dsaGoalAchieved ? '🎉 Goal Achieved!' : `Today's Goal: ${solvedTodayCount}/${dsaDaily} solved`;
+  const dsaGoalPct = Math.round(Math.min(100, (solvedTodayCount / dsaDaily) * 100));
+
+  const sdDailyMins = state.settings.dailySystemDesignMinutes || 60;
+  const sdMinsToday = todayLog.systemDesign?.minutes || 0;
+  const sdGoalAchieved = sdMinsToday >= sdDailyMins;
+  const sdGoalText = sdGoalAchieved ? '🎉 Goal Achieved!' : `Today's Goal: ${sdMinsToday}/${sdDailyMins} mins`;
+  const sdGoalPct = Math.round(Math.min(100, (sdMinsToday / sdDailyMins) * 100));
+
+  const jsDailyMins = state.settings.dailyJsMinutes || 60;
+  const jsMinsToday = todayLog.jsReact?.minutes || 0;
+  const jsGoalAchieved = jsMinsToday >= jsDailyMins;
+  const jsGoalText = jsGoalAchieved ? '🎉 Goal Achieved!' : `Today's Goal: ${jsMinsToday}/${jsDailyMins} mins`;
+  const jsGoalPct = Math.round(Math.min(100, (jsMinsToday / jsDailyMins) * 100));
+
   document.getElementById('track-grid').innerHTML = `
     <div class="card track-card neetcode">
       <div class="track-header">
@@ -169,22 +195,43 @@ export function renderTrackCards() {
           <span class="track-icon">💻</span>
           <span class="track-title">Neetcode DSA</span>
         </div>
-        <span class="track-count">${activeSolved}/${activeTotal}</span>
       </div>
-      <div class="progress-ring-container">
-        <svg class="progress-ring" viewBox="0 0 60 60">
-          <circle class="ring-bg" cx="30" cy="30" r="24"/>
-          <circle class="ring-fill" cx="30" cy="30" r="24"
-            stroke="var(--green-main)" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
-        </svg>
-        <div class="progress-info">
-          <div class="progress-pct">${pct}%</div>
-          <div class="progress-detail">${state.activeList === 'blind75' ? 'Blind 75' : 'Neetcode 150'}</div>
+      <div class="daily-goal-box">
+        <div class="daily-goal-label">
+          <span>🎯 ${dsaGoalText}</span>
+          <span class="daily-goal-pct">${dsaGoalPct}%</span>
+        </div>
+        <div class="progress-bar-track mini">
+          <div class="progress-bar-fill dsa-color" style="width: ${dsaGoalPct}%"></div>
         </div>
       </div>
-      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-      <div class="category-mini"><span>${activeSolved} solved</span><span>${activeTotal - activeSolved} remaining</span></div>
-      ${getTargetFooterHTML(targetStatus.dsa.target, targetStatus.dsa.actual, targetStatus.dsa.diff, ' solved')}
+      <div class="dsa-progress-split">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="var(--green-main)" stroke-dasharray="${circumference}" stroke-dashoffset="${offset75}"/>
+          </svg>
+          <div class="progress-info">
+            <div class="progress-pct">${pct75}%</div>
+            <div class="progress-detail">Blind 75</div>
+            <div class="progress-subtext">${blind75Solved}/${total75} solved</div>
+          </div>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="var(--cyan-main)" stroke-dasharray="${circumference}" stroke-dashoffset="${offset150}"/>
+          </svg>
+          <div class="progress-info">
+            <div class="progress-pct">${pct150}%</div>
+            <div class="progress-detail">Neetcode 150</div>
+            <div class="progress-subtext">${n150Solved}/${total150} solved</div>
+          </div>
+        </div>
+      </div>
+      ${getTargetFooterHTML(targetStatus.dsa.target, targetStatus.dsa.actual, targetStatus.dsa.diff, ' solved', 'Prep Target (Cumulative)')}
     </div>
 
     <div class="card track-card sysdesign">
@@ -194,6 +241,15 @@ export function renderTrackCards() {
           <span class="track-title">System Design</span>
         </div>
         <span class="track-count">${sdDone}/${sdTotal}</span>
+      </div>
+      <div class="daily-goal-box">
+        <div class="daily-goal-label">
+          <span>🎯 ${sdGoalText}</span>
+          <span class="daily-goal-pct">${sdGoalPct}%</span>
+        </div>
+        <div class="progress-bar-track mini">
+          <div class="progress-bar-fill sd-color" style="width: ${sdGoalPct}%"></div>
+        </div>
       </div>
       <div class="progress-ring-container">
         <svg class="progress-ring" viewBox="0 0 60 60">
@@ -208,7 +264,7 @@ export function renderTrackCards() {
       </div>
       <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${sdPct}%"></div></div>
       <div class="category-mini"><span>${sdDone} covered (${sdHours}h logged)</span><span>${sdTotal - sdDone} remaining</span></div>
-      ${getTargetFooterHTML(targetStatus.systemDesign.target, targetStatus.systemDesign.actual, targetStatus.systemDesign.diff, 'h')}
+      ${getTargetFooterHTML(targetStatus.systemDesign.target, targetStatus.systemDesign.actual, targetStatus.systemDesign.diff, 'h', 'Study Target (Cumulative)')}
     </div>
 
     <div class="card track-card jsreact">
@@ -218,6 +274,15 @@ export function renderTrackCards() {
           <span class="track-title">JS / React</span>
         </div>
         <span class="track-count">${jsHours}h</span>
+      </div>
+      <div class="daily-goal-box">
+        <div class="daily-goal-label">
+          <span>🎯 ${jsGoalText}</span>
+          <span class="daily-goal-pct">${jsGoalPct}%</span>
+        </div>
+        <div class="progress-bar-track mini">
+          <div class="progress-bar-fill js-color" style="width: ${jsGoalPct}%"></div>
+        </div>
       </div>
       <div class="progress-ring-container">
         <svg class="progress-ring" viewBox="0 0 60 60">
@@ -233,7 +298,7 @@ export function renderTrackCards() {
       </div>
       <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${Math.min(100, (jsHours / 50) * 100)}%"></div></div>
       <div class="category-mini"><span>${jsSessions} sessions</span><span>${jsMinutes} total mins</span></div>
-      ${getTargetFooterHTML(targetStatus.jsReact.target, targetStatus.jsReact.actual, targetStatus.jsReact.diff, 'h')}
+      ${getTargetFooterHTML(targetStatus.jsReact.target, targetStatus.jsReact.actual, targetStatus.jsReact.diff, 'h', 'Study Target (Cumulative)')}
     </div>
   `;
 }
