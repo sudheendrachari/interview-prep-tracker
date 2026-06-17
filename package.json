@@ -1,0 +1,19 @@
+{
+  "name": "interview-prep-tracker",
+  "version": "1.0.0",
+  "description": "Track your interview preparation progress — Neetcode DSA, System Design, and JS/React projects.",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0"
+  }
+}

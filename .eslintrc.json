@@ -1,0 +1,43 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["airbnb-base"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "globals": {
+    "confetti": "readonly"
+  },
+  "rules": {
+    "no-console": "off",
+    "no-alert": "off",
+    "no-restricted-globals": "off",
+    "import/extensions": ["error", "always", { "js": "always" }],
+
+    // ── Deliberate exceptions for this codebase ────────────────────────────────
+    // The streak calculator uses a while(true) + break pattern which is clearer
+    // than a do-while or recursion for this specific date-walking algorithm.
+    "no-constant-condition": "warn",
+    // Date-walking loop uses continue to skip weekends/vacations clearly.
+    "no-continue": "off",
+    // ++ is used in simple loop counters (targetDays++, currentStreak++).
+    "no-plusplus": "off",
+    // for...of is used in a few milestone checks; acceptable without a bundler.
+    "no-restricted-syntax": [
+      "error",
+      "LabeledStatement",
+      "WithStatement"
+    ],
+    // Function-in-loop in the date walk is a known pattern, suppressed locally.
+    "no-loop-func": "warn",
+    // Long lines in data arrays and template literals are acceptable.
+    "max-len": ["warn", { "code": 120, "ignoreTemplateLiterals": true, "ignoreStrings": true }],
+    // renderAll is imported from render.js; Airbnb flags it because it sees the
+    // local event-bridge arrow function wrapping it. The import is always resolved
+    // before the event fires so there is no real use-before-define risk here.
+    "no-use-before-define": ["error", { "functions": false, "classes": true, "variables": true }]
+  }
+}
