@@ -1,6 +1,6 @@
 {
   "name": "interview-prep-tracker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Track your interview preparation progress — Neetcode DSA, System Design, and JS/React projects.",
   "private": true,
   "scripts": {
