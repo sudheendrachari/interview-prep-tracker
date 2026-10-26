@@ -567,10 +567,12 @@
       </div>
       <div class="lock-title">Google L5 Onsite Prep</div>
       <div class="lock-subtitle">Encrypted preparation dashboard. Enter your passcode to decrypt and unlock.</div>
-      <div class="input-group">
-        <input type="password" id="passcodeInput" class="lock-input" placeholder="Enter Passcode" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter') handleUnlock()">
-      </div>
-      <button class="btn-unlock" id="btnUnlock" onclick="handleUnlock()">Unlock Dashboard →</button>
+      <form onsubmit="event.preventDefault(); handleUnlock();">
+        <div class="input-group">
+          <input type="password" id="passcodeInput" class="lock-input" placeholder="Enter Passcode" autocomplete="current-password" autofocus>
+        </div>
+        <button type="submit" class="btn-unlock" id="btnUnlock">Unlock Dashboard →</button>
+      </form>
       <div class="lock-error" id="lockError">Incorrect Passcode. Decryption failed.</div>
       <label class="remember-row">
         <input type="checkbox" id="rememberDevice" checked>
@@ -613,7 +615,7 @@
       <div class="hero-top">
         <div class="hero-title">
           <h1>Google L5 In-Person Onsite Loop</h1>
-          <p>Bangalore Campus Target: <strong>Friday, Nov 20, 2026</strong> &bull; 2 DSA Rounds + 1 System Design (45 mins each)</p>
+          <p>Bangalore Campus Target: <strong>Friday, Nov 20, 2026</strong> &bull; 2 DSA Rounds (45m) + 1 System Design (60m) + 1h Lunch &bull; Chromebook Coding & Hybrid Doc/Whiteboard</p>
         </div>
         <div class="target-badge">
           <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span>
@@ -665,6 +667,7 @@
         <button class="btn-preset" onclick="setTimerPreset(25, '25m Timed Medium/Hard')">25m</button>
         <button class="btn-preset" onclick="setTimerPreset(35, '35m L5 Follow-Up Gauntlet')">35m</button>
         <button class="btn-preset" onclick="setTimerPreset(45, '45m Full Mock Round')">45m</button>
+        <button class="btn-preset" onclick="setTimerPreset(60, '60m Full System Design')">60m</button>
         <button class="btn-timer-toggle" id="btnTimerToggle" onclick="toggleTimer()">Start Timer</button>
         <button class="btn-timer-reset" onclick="resetTimer()" title="Reset">↺</button>
       </div>
