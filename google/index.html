@@ -797,6 +797,7 @@
         loadState();
         updateCountdown();
         setInterval(updateCountdown, 60000);
+        autoSelectTodayPhase();
         renderCurrentPhase();
         updateMetrics();
       } catch (e) {
@@ -825,6 +826,7 @@
           loadState();
           updateCountdown();
           setInterval(updateCountdown, 60000);
+          autoSelectTodayPhase();
           renderCurrentPhase();
           updateMetrics();
           return;
@@ -1049,6 +1051,37 @@
       }
     }
 
+    const MONTH_MAP = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+
+    function isDayToday(day) {
+      if (!day || !day.dateStr) return false;
+      const parts = day.dateStr.split(" ");
+      if (parts.length >= 3 && MONTH_MAP[parts[1]] !== undefined) {
+        const now = new Date();
+        const dayNum = parseInt(parts[2], 10);
+        return now.getMonth() === MONTH_MAP[parts[1]] && now.getDate() === dayNum;
+      }
+      return false;
+    }
+
+    function autoSelectTodayPhase() {
+      if (!SCHEDULE_DATA) return;
+      for (let p = 1; p <= 4; p++) {
+        const phase = SCHEDULE_DATA["phase" + p];
+        if (phase && phase.days && phase.days.some(d => isDayToday(d))) {
+          currentPhaseNum = p;
+          const tabBtns = document.querySelectorAll(".tab-btn");
+          tabBtns.forEach((btn, idx) => {
+            if (idx === p - 1) btn.classList.add("active");
+            else btn.classList.remove("active");
+          });
+          const statPhaseEl = document.getElementById("statPhase");
+          if (statPhaseEl) statPhaseEl.textContent = `Phase ${p}`;
+          break;
+        }
+      }
+    }
+
     function renderCurrentPhase() {
       if (!SCHEDULE_DATA) return;
       const container = document.getElementById("scheduleContainer");
@@ -1063,33 +1096,37 @@
         </div>
       `;
 
+      const hasTodayInPhase = phase.days.some(d => isDayToday(d));
+
       phase.days.forEach((day, index) => {
+        const isToday = isDayToday(day);
+
         // Filter tasks
         let visibleTasks = day.tasks.filter(t => {
           if (currentFilter === "all") return true;
-          if (currentFilter === "today") return day.isToday;
+          if (currentFilter === "today") return isToday;
           if (currentFilter === "uncompleted") return !progressState[t.id];
           if (currentFilter === "sysdesign") return t.tags.includes("sysdesign");
           return t.tags.includes(currentFilter);
         });
 
-        const showDay = (currentFilter === "today") ? day.isToday : (visibleTasks.length > 0 || (day.sd && (currentFilter === "all" || currentFilter === "sysdesign")));
+        const showDay = (currentFilter === "today") ? isToday : (visibleTasks.length > 0 || (day.sd && (currentFilter === "all" || currentFilter === "sysdesign")));
 
         if (!showDay) return;
 
-        const isOpen = day.isToday || index === 0 || currentFilter === "today";
+        const isOpen = isToday || currentFilter === "today" || (!hasTodayInPhase && index === 0);
         const totalDayTasks = day.tasks.length + (day.sd ? 1 : 0);
         let completedInDay = 0;
         day.tasks.forEach(t => { if (progressState[t.id]) completedInDay++; });
         if (day.sd && progressState[day.sd.id]) completedInDay++;
 
         html += `
-          <div class="day-card ${isOpen ? 'open' : ''} ${day.isToday ? 'current-day' : ''}" id="day_card_${day.id}">
+          <div class="day-card ${isOpen ? 'open' : ''} ${isToday ? 'current-day' : ''}" id="day_card_${day.id}">
             <div class="day-header" onclick="toggleAccordion('${day.id}')">
               <div class="day-header-left">
                 <div class="day-title">
                   ${day.dateStr}
-                  ${day.isToday ? '<span class="badge" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4)">TODAY</span>' : ''}
+                  ${isToday ? '<span class="badge" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4)">TODAY</span>' : ''}
                 </div>
                 <div class="day-theme">&bull; ${day.theme}</div>
               </div>
