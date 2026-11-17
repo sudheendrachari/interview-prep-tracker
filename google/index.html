@@ -939,52 +939,48 @@
       updateDayHeaderCounts();
     }
 
-        // ===== METRICS CALCULATION =====
+        // ===== METRICS CALCULATION (Calibrated Active Syllabus) =====
+    const FOUNDATION_DSA_IDS = [
+      "lc_200", "lc_994", "lc_417", "lc_133", "lc_207", "lc_210", "lc_684", "lc_721", "lc_743", "lc_269",
+      "lc_33", "lc_153", "lc_380", "lc_57", "lc_875", "lc_410", "lc_981", "lc_56", "lc_253", "lc_435",
+      "lc_3", "lc_76", "lc_215", "lc_295"
+    ];
+
     function updateMetrics() {
-      let totalTasks = 0;
-      let completedTasks = 0;
-      let dsaTotal = 0;
-      let dsaCompleted = 0;
-      let sdTotal = 0;
-      let sdCompleted = 0;
+      // Collect active unique task IDs across Foundations + Phase 3 Sprint
+      const activeDsaSet = new Set(FOUNDATION_DSA_IDS);
+      const activeSdSet = new Set();
 
-      Object.values(SCHEDULE_DATA).forEach(phase => {
-        phase.days.forEach(day => {
+      if (SCHEDULE_DATA.phase3 && SCHEDULE_DATA.phase3.days) {
+        SCHEDULE_DATA.phase3.days.forEach(day => {
           day.tasks.forEach(t => {
-            totalTasks++;
-            const isCompleted = !!progressState[t.id];
-            if (isCompleted) completedTasks++;
-
-            if (t.tags.includes("dsa")) {
-              dsaTotal++;
-              if (isCompleted) dsaCompleted++;
-            } else if (t.tags.includes("sysdesign")) {
-              sdTotal++;
-              if (isCompleted) sdCompleted++;
-            }
+            if (t.tags && t.tags.includes("dsa")) activeDsaSet.add(t.id);
+            else if (t.tags && t.tags.includes("sysdesign")) activeSdSet.add(t.id);
           });
-
           if (day.sd) {
             if (day.sd.modules) {
-              day.sd.modules.forEach(m => {
-                totalTasks++;
-                sdTotal++;
-                if (progressState[m.id]) {
-                  completedTasks++;
-                  sdCompleted++;
-                }
-              });
+              day.sd.modules.forEach(m => activeSdSet.add(m.id));
             } else {
-              totalTasks++;
-              sdTotal++;
-              if (progressState[day.sd.id]) {
-                completedTasks++;
-                sdCompleted++;
-              }
+              activeSdSet.add(day.sd.id);
             }
           }
         });
+      }
+
+      let dsaCompleted = 0;
+      activeDsaSet.forEach(id => {
+        if (progressState[id]) dsaCompleted++;
       });
+
+      let sdCompleted = 0;
+      activeSdSet.forEach(id => {
+        if (progressState[id]) sdCompleted++;
+      });
+
+      const dsaTotal = activeDsaSet.size;
+      const sdTotal = activeSdSet.size;
+      const totalTasks = dsaTotal + sdTotal;
+      const completedTasks = dsaCompleted + sdCompleted;
 
       const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
       document.getElementById("statPercent").textContent = percent + "%";
